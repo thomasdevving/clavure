@@ -24,9 +24,10 @@
 #     implementer can only execute `clavure`, the publisher only `git`.
 #   * No component has edit_file / create_file_with_contents: agents cannot
 #     write files themselves; only the Clavure CLI changes manifests.
-#   * CI job guard:trusted-files fails any automated MR touching trusted files
-#     (requirements, verifiers, tests, CI, flow config); CODEOWNERS + protected
-#     branches require human security approval to merge.
+#   * CI job clavure:security-gate:mr (built from the protected default
+#     branch) blocks any automated MR touching trusted files (requirements,
+#     verifiers, tests, CI, flow config) and any MR that fails verification;
+#     see ci/trusted/README.md for enforcing the CI configuration itself.
 version: "v1"
 environment: ambient
 
@@ -213,7 +214,7 @@ prompts:
         - the analysis result token,
         - the remediation merge request URL if one was created in this flow.
         Report only what Clavure's files say. Never state that runtime verification
-        passed: runtime verification runs later in CI (job runtime:k3d).
+        passed: runtime verification runs later in CI (job clavure:runtime:k3d).
       user: |
         Project ID: {{project_id}}
         Request: {{goal}}

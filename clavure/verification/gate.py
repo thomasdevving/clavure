@@ -60,10 +60,22 @@ def evaluate_gate(artifacts: Path) -> dict:
                 f"a remediation is available ({ver['final_verdict']}); it must be merged as its own reviewed change"
             )
     trusted = _load(artifacts, "trusted-model-verification.json")
-    if trusted is not None and trusted.get("outcome") != "PASS":
-        reasons.append(
-            f"verification with target-branch verifier and requirements: {trusted.get('outcome')}"
-        )
+    if trusted is not None:
+        outcome = trusted.get("gate_outcome", trusted.get("outcome"))
+        if outcome != "PASS":
+            keys = (
+                "forbidden_failures",
+                "required_regressions",
+                "new_connectivity",
+                "structural_errors",
+                "engine_disagreements",
+            )
+            detail = {k: trusted[k] for k in keys if trusted.get(k)}
+            reasons.append(
+                f"trusted verification (default-branch verifier and requirements): {outcome} {detail}"
+            )
+        for cid in trusted.get("preexisting_required_failures", []):
+            notes.append(f"{cid} was already unmet before this change (not blocking)")
     if guard is not None and not guard.get("ok", True):
         reasons.append(f"trusted-file guard: {guard.get('decision')}")
     return {"pass": not reasons, "blocking_reasons": reasons, "notes": notes}

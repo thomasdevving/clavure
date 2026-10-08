@@ -1,7 +1,8 @@
 # Clavure CLI image (analysis, optimization, model verification, reporting).
 # Runtime verification additionally needs docker, k3d and kubectl on the host
 # or runner; see docs/runtime-environment.md.
-ARG BASE_IMAGE=python:3.12-slim
+# Pinned by digest (Docker Hub mirrors, 2026-10-08).
+ARG BASE_IMAGE=python:3.12-slim@sha256:05cda9777409a9c3ffddd94a4c476b79f0769a0b4857f0c7ed9226b6800b0d6f
 FROM ${BASE_IMAGE}
 
 RUN apt-get update && apt-get install -y --no-install-recommends git \

@@ -17,7 +17,7 @@ done
 
 SCENARIO=demo/scenario.yaml
 BASE=demo/manifests/base
-CHANGE=demo/manifests/change-analytics
+CHANGE=demo/changes/unsafe-reporting-access
 
 echo "== 1. Permission change introduced by the developer change"
 clavure diff --before "$BASE" --after "$BASE" "$CHANGE" --scenario "$SCENARIO" --out artifacts/permission-diff.json

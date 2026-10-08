@@ -183,6 +183,7 @@ def cmd_mr_check(args) -> int:
         fetch=args.fetch,
         runtime=args.runtime,
         cluster_name=args.cluster_name,
+        trusted_root=Path(args.trusted_root) if args.trusted_root else None,
     )
     print((Path(args.out) / "summary.md").read_text())
     print(f"CLAVURE_RESULT={result}")
@@ -302,6 +303,7 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--out", default="artifacts/mr-check")
     m.add_argument("--fetch", action="store_true", help="git fetch the target branch first")
     m.add_argument("--runtime", action="store_true", help="also run runtime stages on k3d")
+    m.add_argument("--trusted-root", help="read config and requirements from this worktree")
     m.add_argument("--cluster-name", default="clavure-ci")
     m.add_argument(
         "--fail-on-violation",

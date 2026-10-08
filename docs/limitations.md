@@ -34,14 +34,22 @@
 * Blocked-connection evidence on K3s is ECONNREFUSED. It is accepted only with
   a healthy target listener and a passing enforcement canary.
 * The demo databases are synthetic line-protocol emulators.
-* The `runtime:k3d` CI job (docker-in-docker) has not been run.
+* The `clavure:runtime:k3d` job script ran locally with the host Docker daemon standing in for the dind service; the dind service networking itself has not been run.
 
 ## GitLab
 
 * Neither the Duo flow nor any GitLab pipeline has been executed (no GitLab
-  access in the build environment).
-* An MR can edit `.gitlab-ci.yml`. Enforce the guard and trusted verification
-  jobs with a pipeline execution policy or an external CI configuration.
+  credentials in the build environment). The trusted CI job scripts were
+  executed locally in the pinned job image (`tests/integration/test_ci_jobs_local.py`);
+  that is not a substitute for GitLab's own workflow and rule evaluation.
+* CI enforcement requires project settings (see `ci/trusted/README.md`). In
+  development mode an MR can edit the pipeline.
+* On Free, Maintainers can change the CI configuration file setting, and
+  merge approvals are not enforced.
+* The static Docker CLI used by `clavure:runtime:k3d` has no vendor checksum;
+  its pinned SHA-256 was recorded at pin time (trust on first use).
+* Pinned digests and hashes must be bumped deliberately to pick up security
+  fixes in base images and dependencies.
 * Flow routing depends on the agent returning the exact token printed by
   Clavure. A wrong token falls through to the reporter (fail-safe), not to
   publishing.

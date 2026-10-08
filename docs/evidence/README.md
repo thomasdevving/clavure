@@ -2,7 +2,7 @@
 
 These directories are the **unmodified JSON artifacts** of two real pipeline runs
 executed on 2026-10-08 in a disposable k3d cluster (K3s v1.34.1, embedded
-kube-router NetworkPolicy controller), inside the Claude Code cloud sandbox used
+kube-router NetworkPolicy controller), inside the cloud development sandbox used
 to build Clavure. `clavure-report.html` in each directory was re-rendered from
 those same JSON files after a layout change to the report template; no JSON
 content was edited.
@@ -11,6 +11,11 @@ content was edited.
 |---|---|---|
 | `run-clean/` | `clavure pipeline --runtime --scenario demo/scenario.yaml --baseline demo/manifests/base --proposed demo/manifests/base demo/manifests/change-analytics` | `REMEDIATION_VERIFIED` |
 | `run-drift/` | same, plus `--inject-drift demo/drift/legacy-finance-export.yaml` (documented fault injection) | `REMEDIATION_VERIFIED` after 2 attempts |
+
+The commands above are as recorded. The developer change has since moved from
+`demo/manifests/change-analytics/` to `demo/changes/unsafe-reporting-access/`
+(content unchanged apart from its header comment), so it is no longer part of
+the desired state; the demonstration merge request adds it back.
 
 What to look at:
 

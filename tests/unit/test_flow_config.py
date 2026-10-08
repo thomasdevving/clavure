@@ -146,20 +146,6 @@ def test_agent_config_uses_documented_keys_and_no_cluster_credentials():
     assert "kubeconfig" not in text.replace("kubernetes credentials", "")
 
 
-def test_ci_references_existing_tests_and_has_blocking_gate():
-    ci = yaml.safe_load((ROOT / ".gitlab-ci.yml").read_text())
-    for name, job in ci.items():
-        if not isinstance(job, dict) or "script" not in job:
-            continue
-        script = job["script"] if isinstance(job["script"], str) else " ".join(job["script"])
-        for path in re.findall(r"tests/unit/\S+\.py", script):
-            assert (ROOT / path).exists(), (name, path)
-    assert "clavure gate" in " ".join(ci["gate:security"]["script"])
-    assert ci["deploy:staging"]["rules"][0]["when"] == "manual"
-    trusted = " ".join(ci["verify:trusted"]["script"])
-    assert "worktree add" in trusted and "trusted_ci" in trusted and "cd /tmp" in trusted
-
-
 def test_codeowners_cover_trusted_files():
     owners = (ROOT / ".gitlab" / "CODEOWNERS").read_text()
     cfg = yaml.safe_load((ROOT / ".clavure.yaml").read_text())

@@ -10,7 +10,10 @@
 /clavure/core/
 /tests/
 /.gitlab-ci.yml
+/ci/
+/requirements/
 /.gitlab/
 /flows/
 /requirements.lock
 /requirements-dev.lock
+/requirements-build.lock

@@ -157,8 +157,9 @@ def write_summaries(out: Path, ref: str) -> tuple[str, str]:
             _md_table(v_rows, ["Constraint", "Expected", "Outcome"]) if v_rows else "",
             "",
             "### Still to be demonstrated by CI",
-            "- `verify:model` re-runs the verifier from the target branch (trusted code and requirements).",
-            "- `runtime:k3d` deploys to a disposable cluster and re-runs connectivity probes and business "
+            "- `clavure:security-gate:mr` re-runs guard, independent verifier and gate with Clavure, "
+            "requirements and trusted-file list from the protected default branch.",
+            "- `clavure:runtime:k3d` deploys to a disposable cluster and re-runs connectivity probes and business "
             "workflows (only on runners that support it; otherwise reported as not executed).",
             "",
             "### Limitations",
@@ -179,8 +180,12 @@ def run_mr_check(
     fetch: bool = False,
     runtime: bool = False,
     cluster_name: str = "clavure-ci",
+    trusted_root: Path | None = None,
 ) -> tuple[str, dict]:
-    cfg = load_config(config)
+    """With ``trusted_root``, configuration and requirements come from that
+    worktree (the protected default branch); manifests come from the cwd."""
+    cfg = load_config(trusted_root / ".clavure.yaml" if trusted_root else config)
+    scenario = (trusted_root / cfg["scenario"]) if trusted_root else Path(cfg["scenario"])
     if fetch and target_ref.startswith("origin/"):
         subprocess.run(
             ["git", "fetch", "--depth=200", "origin", target_ref.split("/", 1)[1]],
@@ -192,7 +197,7 @@ def run_mr_check(
         baseline = materialize_ref(target_ref, cfg["manifests"], Path(tmp))
         report = run_pipeline(
             PipelineOptions(
-                scenario=Path(cfg["scenario"]),
+                scenario=scenario,
                 baseline=baseline,
                 proposed=[Path(p) for p in cfg["manifests"]],
                 out=out,

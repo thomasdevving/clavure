@@ -1,0 +1,164 @@
+# Clavure pipeline (single source of truth for all CI modes).
+#
+#   Enforced, all tiers: Settings > CI/CD > General pipelines > CI/CD
+#     configuration file = ci/trusted/pipeline.yml@<group>/clavure-ci
+#     (a protected project that holds a reviewed copy of ci/trusted/).
+#     GitLab then ignores the project's own .gitlab-ci.yml.
+#   Enforced, Ultimate: ci/trusted/security-policy.yml (pipeline execution
+#     policy) additionally injects ci/trusted/policy-pipeline.yml.
+#   Not enforced (development): .gitlab-ci.yml includes this file locally.
+#
+# See ci/trusted/README.md for the full strategy and required settings.
+
+include:
+  - local: /ci/trusted/jobs.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+stages:
+  - lint
+  - test
+  - security
+  - runtime
+  - package
+  - report
+  - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# --------------------------------------------------------------------------
+# Quality jobs: run the code under test. They do not decide security outcomes.
+.clavure-quality:
+  extends: .clavure-trusted-image
+  cache:
+    key:
+      files: [requirements-dev.lock]
+    paths: [.cache/pip]
+  before_script:
+    - pip install --quiet --require-hashes -r requirements-dev.lock -r requirements-build.lock
+    - pip install --quiet --no-deps --no-build-isolation -e .
+
+lint:
+  extends: .clavure-quality
+  stage: lint
+  script:
+    - ruff check .
+    - ruff format --check .
+
+.clavure-pytest:
+  extends: .clavure-quality
+  stage: test
+  artifacts:
+    when: always
+    reports:
+      junit: junit-*.xml
+
+test:policy-parsing:
+  extends: .clavure-pytest
+  script: pytest tests/unit/test_parser.py --junitxml=junit-parsing.xml
+
+test:k8s-semantics:
+  extends: .clavure-pytest
+  script: pytest tests/unit/test_semantics.py tests/unit/test_differential.py --junitxml=junit-semantics.xml
+
+test:graph-consistency:
+  extends: .clavure-pytest
+  script: pytest tests/unit/test_graph.py tests/unit/test_demo_analysis.py --junitxml=junit-graph.xml
+
+test:optimizer:
+  extends: .clavure-pytest
+  script: pytest tests/unit/test_optimizer.py --junitxml=junit-optimizer.xml
+
+test:remediation-verification:
+  extends: .clavure-pytest
+  script: >-
+    pytest tests/unit/test_verification_model.py tests/unit/test_pipeline_report.py
+    tests/unit/test_guard_gate.py tests/unit/test_flow_config.py tests/unit/test_ci_config.py
+    --junitxml=junit-verification.xml
+
+# --------------------------------------------------------------------------
+# Trusted security jobs (definitions in jobs.yml).
+clavure:security-gate:mr:
+  extends: .clavure-trusted-mr-gate
+  stage: security
+  needs: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+clavure:security-gate:branch:
+  extends: .clavure-trusted-branch-gate
+  stage: security
+  needs: []
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+# Needs a runner tagged clavure-privileged (privileged docker-in-docker) and
+# the project variable CLAVURE_RUNTIME_RUNNER=true. Without it, the job is not
+# created and reports state that runtime verification was not executed.
+clavure:runtime:k3d:
+  extends: .clavure-trusted-runtime
+  stage: runtime
+  needs: []
+  tags: [clavure-privileged]
+  rules:
+    - if: $CLAVURE_RUNTIME_RUNNER != "true"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# --------------------------------------------------------------------------
+package:wheel:
+  extends: .clavure-quality
+  stage: package
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+  needs:
+    - job: clavure:security-gate:branch
+  script:
+    - pip wheel --quiet --no-deps --no-build-isolation --wheel-dir dist/ .
+  artifacts:
+    paths: [dist/]
+
+report:html:
+  extends: .clavure-quality
+  stage: report
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables: {GATE_DIR: artifacts/trusted/mr-check}
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables: {GATE_DIR: artifacts/trusted}
+  needs:
+    - job: clavure:security-gate:mr
+      artifacts: true
+      optional: true
+    - job: clavure:security-gate:branch
+      artifacts: true
+      optional: true
+  script:
+    - clavure report --artifacts "$GATE_DIR" --out clavure-report.html
+  artifacts:
+    when: always
+    expose_as: "Clavure report"
+    paths: [clavure-report.html]
+
+# Manual, protected ref, protected environment (Premium+: deployment
+# approvals). Cannot start unless the trusted branch gate of this pipeline
+# passed (needs), and re-checks the gate record itself.
+deploy:staging:
+  extends: .clavure-trusted-deploy-staging
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $STAGING_KUBECONFIG
+      when: manual
+  needs:
+    - job: clavure:security-gate:branch
+      artifacts: true

@@ -12,7 +12,7 @@ for human review.
 | `clavure.runtime` (cluster controller) | privileged | its own kubeconfig in `.clavure/` | touches `~/.kube/config` or the current context; acts outside the test namespaces |
 | Demo workloads / probe commands | restricted | no Kubernetes API token (`automountServiceAccountToken: false`), non-root, read-only root FS, all capabilities dropped, resource limits | receive controller credentials |
 | GitLab Duo flow agents | untrusted orchestrators | `run_command` pinned to `clavure` or `git`; no file-editing tools; Developer role | decide security outcomes; change requirements, verifiers, tests or CI (blocked by guard + CODEOWNERS) |
-| Merge request under review | untrusted | — | provide the verifier or requirements that judge it (`verify:trusted` uses the target branch) |
+| Merge request under review | untrusted | — | provide the code, requirements or trusted-file list that judge it (security jobs build Clavure from the protected default branch) |
 
 ## Runtime safety
 
@@ -43,25 +43,36 @@ for human review.
   verification (`cross_check`).
 * `apply-remediation --verify` rolls back the files if independent verification
   fails.
-* In CI, `verify:trusted` installs Clavure from the **target branch** and
-  judges the MR's manifests with the target branch's requirements and
-  verifier.
+* In CI, every security-deciding job installs Clavure, the requirements and the
+  trusted-file list from the protected **default branch**. It never uses the
+  MR or the MR's *target* branch, which may be unprotected (the Duo flow's
+  remediation MRs target the developer's branch). The target branch is used
+  only as the comparison baseline.
+* The gate blocks forbidden connectivity and regressions. A required
+  connection that was already unmet before the change is reported, not
+  blocking.
 
 ## What protects trusted files (layers)
 
 1. Agents have no file-writing tools, and `run_command` is pinned per
    component.
-2. `guard:trusted-files` fails any MR authored by an automated identity
-   (`^ai-`, project/group bots) or on a `clavure/remediation-*` branch that
-   touches trusted paths (`.clavure.yaml#trusted`).
+2. The guard (in `clavure:security-gate:mr`, run with default-branch code
+   and the default branch's trusted-file list) fails any MR authored by an
+   automated identity (`^ai-`, project/group bots) or on a
+   `clavure/remediation-*` branch that touches trusted paths.
 3. `.gitlab/CODEOWNERS` requires security owners to approve changes to trusted
    paths. This needs "Require approval from code owners" on the protected
    default branch.
-4. `verify:trusted` uses target-branch code, so weakening the verifier in the
-   MR has no effect on the MR's own verdict.
-5. **Remaining gap:** an MR can edit `.gitlab-ci.yml` itself. Close it with a
-   pipeline execution policy or an external CI configuration file in a
-   protected project. Instructions to agents are not treated as a boundary.
+4. Verification uses default-branch code, so weakening the verifier or the
+   requirements in the MR, or on its target branch, has no effect on the MR's
+   verdict. This was executed locally in `tests/integration/test_ci_jobs_local.py`.
+5. The job definitions themselves are enforced by loading them from outside
+   the MR: an external CI configuration file in a protected project (all
+   tiers) or a pipeline execution policy (Ultimate). Add "Pipelines must
+   succeed" and set the pipeline-variable role to `no_one_allowed`. In
+   development mode (the root `.gitlab-ci.yml`) an MR can still edit the
+   pipeline; see [`ci/trusted/README.md`](../ci/trusted/README.md).
+   Instructions to agents are not treated as a boundary.
 
 ## Not claimed
 

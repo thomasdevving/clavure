@@ -1,0 +1,22 @@
+# Clavure trusted gates for a pipeline execution policy (GitLab Ultimate).
+#
+# Referenced from ci/trusted/security-policy.yml with the inject_policy
+# strategy. Policy jobs run from this isolated YAML: the project's own CI
+# configuration cannot override them. Jobs in .pipeline-policy-pre always run,
+# and if they fail, every later job in the pipeline is skipped, including
+# deployment jobs defined by the project. [skip ci] does not skip them.
+include:
+  - local: /ci/trusted/jobs.yml
+
+clavure-policy:security-gate:mr:
+  extends: .clavure-trusted-mr-gate
+  stage: .pipeline-policy-pre
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+clavure-policy:security-gate:branch:
+  extends: .clavure-trusted-branch-gate
+  stage: .pipeline-policy-pre
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG

@@ -20,6 +20,11 @@ trusted:
   - clavure/core/
   - tests/
   - .gitlab-ci.yml
+  - ci/
+  - requirements.lock
+  - requirements-build.lock
+  - requirements-dev.lock
+  - requirements/
   - .gitlab/CODEOWNERS
   - .gitlab/duo/
   - flows/

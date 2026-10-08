@@ -13,7 +13,7 @@ from clavure.cli import main as cli
 from clavure.verification.gate import evaluate_gate
 from clavure.verification.guard import check_trusted_files
 from clavure.verification.trusted_ci import run as trusted_run
-from tests.conftest import ROOT
+from tests.conftest import CHANGE, ROOT
 
 
 def git(repo: Path, *args: str) -> str:
@@ -30,24 +30,21 @@ def repo(tmp_path) -> Path:
     for item in (".clavure.yaml", "demo", "clavure", "requirements.lock", "pyproject.toml"):
         src = ROOT / item
         (shutil.copytree if src.is_dir() else shutil.copy2)(src, r / item)
-    shutil.rmtree(r / "demo" / "manifests" / "change-analytics")
     git(r, "init", "-q", "-b", "main")
     git(r, "config", "user.email", "t@example.com")
     git(r, "config", "user.name", "t")
     git(r, "add", "-A")
     git(r, "commit", "-q", "-m", "baseline")
     git(r, "checkout", "-q", "-b", "dev")
-    shutil.copytree(
-        ROOT / "demo" / "manifests" / "change-analytics",
-        r / "demo" / "manifests" / "change-analytics",
-    )
+    # Same layout as the demonstration MR (branch demo/unsafe-networkpolicy).
+    shutil.copytree(CHANGE, r / "demo" / "manifests" / "analytics-access")
     git(r, "add", "-A")
     git(r, "commit", "-q", "-m", "reporting data access")
     return r
 
 
 def test_guard_blocks_automated_change_to_trusted_files():
-    files = ["demo/scenario.yaml", "demo/manifests/change-analytics/30-reporting-data-access.yaml"]
+    files = ["demo/scenario.yaml", "demo/manifests/analytics-access/30-reporting-data-access.yaml"]
     bot = check_trusted_files(
         "x", repo=ROOT, actor="ai-clavure-remediation-acme", branch="feature", files=files
     )
@@ -92,7 +89,7 @@ def test_flow_sequence_on_local_git(repo, monkeypatch):
         "dev", repo=repo, actor="ai-clavure-remediation-acme", branch="clavure/remediation-1"
     )
     assert g["ok"], g
-    assert g["changed_files"] == ["demo/manifests/change-analytics/30-reporting-data-access.yaml"]
+    assert g["changed_files"] == ["demo/manifests/analytics-access/30-reporting-data-access.yaml"]
     # Re-check the remediated branch against the developer branch: clean.
     assert cli(["mr-check", "--target-ref", "dev", "--out", "artifacts/after"]) == 0
     assert evaluate_gate(repo / "artifacts/after")["pass"]
@@ -147,6 +144,7 @@ def test_apply_remediation_rolls_back_on_failed_verification(tmp_path, monkeypat
     work = tmp_path / "w"
     shutil.copytree(ROOT / "demo", work / "demo")
     shutil.copy2(ROOT / ".clavure.yaml", work / ".clavure.yaml")
+    shutil.copytree(CHANGE, work / "demo" / "manifests" / "analytics-access")
     monkeypatch.chdir(work)
     a = analyze([Path("demo/manifests")], scenario)
     r = optimize(a)
@@ -159,3 +157,52 @@ def test_apply_remediation_rolls_back_on_failed_verification(tmp_path, monkeypat
     assert cli(["apply-remediation", "--plan", "plan.json", "--verify"]) == 1
     after = {p: p.read_text() for p in Path("demo/manifests").rglob("*.yaml")}
     assert after == before  # rolled back, including no stray generated file
+
+
+def test_preexisting_unmet_requirement_does_not_block(repo, tmp_path):
+    """On the clean baseline, REQ-REPORTING-ORDERS is not yet implemented."""
+    git(repo, "checkout", "-q", "main")
+    trusted = tmp_path / "trusted"
+    git(repo, "worktree", "add", "-q", "--detach", str(trusted), "main")
+    doc = trusted_run(trusted, repo, tmp_path / "out")
+    assert doc["outcome"] == "FAIL"  # the verifier still reports the unmet requirement
+    assert doc["gate_outcome"] == "PASS"
+    assert doc["preexisting_required_failures"] == ["REQ-REPORTING-ORDERS"]
+    gate = evaluate_gate(tmp_path / "out")
+    assert gate["pass"], gate
+    assert any("REQ-REPORTING-ORDERS" in n for n in gate["notes"])
+
+
+def test_required_regression_blocks(repo, tmp_path):
+    """Breaking checkout (a required connection that worked before) is blocked."""
+    git(repo, "checkout", "-q", "-b", "break-payments", "main")
+    pol = repo / "demo/manifests/base/21-data-policies.yaml"
+    pol.write_text(pol.read_text().replace("app: payment-service", "app: nobody"))
+    git(repo, "commit", "-q", "-am", "oops")
+    trusted = tmp_path / "trusted"
+    git(repo, "worktree", "add", "-q", "--detach", str(trusted), "main")
+    doc = trusted_run(trusted, repo, tmp_path / "out", baseline_root=trusted)
+    assert doc["gate_outcome"] == "FAIL"
+    assert doc["required_regressions"] == ["REQ-PAYMENT-FINANCEDB"]
+
+
+def test_mr_into_unprotected_branch_is_judged_by_default_branch(repo, tmp_path):
+    """The target branch can be weakened first; the default branch decides."""
+    git(repo, "checkout", "-q", "-b", "weakened", "dev")
+    scen = repo / "demo/scenario.yaml"
+    before = scen.read_text()
+    scen.write_text(
+        scen.read_text().replace(
+            "port: any\n      description: Analytics", "port: 9187\n      description: Analytics"
+        )
+    )
+    assert scen.read_text() != before
+    git(repo, "commit", "-q", "-am", "relax requirement on an unprotected branch")
+    trusted = tmp_path / "trusted"
+    git(repo, "worktree", "add", "-q", "--detach", str(trusted), "main")
+    target = tmp_path / "target"
+    git(repo, "worktree", "add", "-q", "--detach", str(target), "weakened")
+    doc = trusted_run(trusted, repo, tmp_path / "out", baseline_root=target)
+    assert doc["requirements"].startswith(str(trusted))
+    assert "FORBID-REPORTING-FINANCEDB" in doc["forbidden_failures"]
+    assert doc["gate_outcome"] == "FAIL"

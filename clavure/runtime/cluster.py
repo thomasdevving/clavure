@@ -38,7 +38,8 @@ from dataclasses import dataclass, field
 from importlib import resources
 from pathlib import Path
 
-DEFAULT_K3S_IMAGE = "rancher/k3s:v1.34.1-k3s1"
+# Pinned by digest (Docker Hub, 2026-10-08). k3d accepts tag@digest.
+DEFAULT_K3S_IMAGE = "rancher/k3s:v1.34.1-k3s1@sha256:5e0707cfd1239b358ef73f3254bc3eadc027dd30cd5ec6ca41e29e47652a1b8c"
 STATE_DIR = Path(".clavure")
 
 

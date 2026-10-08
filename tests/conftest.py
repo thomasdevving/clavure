@@ -13,7 +13,7 @@ from clavure.core.policy_parser import parse_documents
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / "demo"
 BASE = DEMO / "manifests" / "base"
-CHANGE = DEMO / "manifests" / "change-analytics"
+CHANGE = DEMO / "changes" / "unsafe-reporting-access"
 DRIFT = DEMO / "drift"
 SCENARIO = DEMO / "scenario.yaml"
 

@@ -1,0 +1,27 @@
+# Example .gitlab/security-policies/policy.yml for a security policy project
+# (GitLab Ultimate). Replace the project path and IDs. Schema:
+# doc/user/application_security/policies/pipeline_execution_policies.md
+---
+pipeline_execution_policy:
+  - name: Clavure trusted security gate
+    description: >-
+      Runs Clavure's guard, independent verification and gate from the
+      protected clavure-ci project before any other job.
+    enabled: true
+    pipeline_config_strategy: inject_policy
+    suffix: never
+    content:
+      include:
+        - project: my-group/clavure-ci
+          file: ci/trusted/policy-pipeline.yml
+          ref: main
+    skip_ci:
+      allowed: false
+    no_pipeline:
+      allowed: false
+    variables_override:
+      allowed: false
+    policy_scope:
+      projects:
+        including:
+          - id: 0 # replace with the application project's ID

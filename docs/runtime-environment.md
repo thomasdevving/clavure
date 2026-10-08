@@ -63,3 +63,21 @@ without that layer, with the sandbox CA supplied as a BuildKit secret (not
 committed), installed the pinned dependencies and ran `clavure verify-model`
 as uid 10001 with the expected result. A normal CI runner needs no extra
 settings.
+
+## Running the CI job scripts locally
+
+`tests/integration/test_ci_jobs_local.py` runs the trusted CI jobs' scripts in
+their digest-pinned image against a simulated repository (see
+[`ci/trusted/README.md`](../ci/trusted/README.md)).
+
+```bash
+CLAVURE_CI_JOB_TESTS=1 pytest -q tests/integration/test_ci_jobs_local.py
+# also deploy to a local disposable "staging" k3d cluster:
+CLAVURE_TEST_STAGING=1 ...
+# also run clavure:runtime:k3d with the host Docker daemon in place of dind:
+CLAVURE_TEST_RUNTIME_JOB=1 ...
+```
+
+Sandbox-only knobs: `CLAVURE_TEST_REGISTRY_MIRROR` (pull official images via
+a mirror), `CLAVURE_TEST_CA_BUNDLE` (CA for a TLS-intercepting proxy) and
+`CLAVURE_TEST_K3D_TOOLS` (k3d helper image when ghcr.io is unreachable).

@@ -1,8 +1,13 @@
 # CHANGE: "Give the reporting service read access to order data"
 #
-# This is the developer change used in the Clavure demo (it plays the role of
-# the merge request under review). It implements a legitimate requirement
-# (REQ-REPORTING-ORDERS: reporting -> orders-db:5432) but contains a
+# Not part of the desired state: .clavure.yaml analyses demo/manifests/ only.
+# This is the developer change used by the Clavure demo. The demonstration
+# merge request (branch demo/unsafe-networkpolicy) adds this file as
+# demo/manifests/analytics-access/30-reporting-data-access.yaml; tests and the
+# local demo script read it from here.
+#
+# It implements a legitimate requirement (REQ-REPORTING-ORDERS:
+# reporting -> orders-db:5432) but contains a
 # DELIBERATE, DOCUMENTED MISCONFIGURATION:
 #
 #   1. The ingress policy selects the whole data tier (`tier: data`), which
