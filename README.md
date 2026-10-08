@@ -125,4 +125,5 @@ docs/              documentation and recorded evidence
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE). One configuration file derived from K3s remains
+Apache-2.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

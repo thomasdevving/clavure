@@ -1,8 +1,13 @@
-# containerd config template for K3s v1.34 (config version 3).
-# Identical to the K3s-generated default except restrict_oom_score_adj = true,
-# needed in nested sandboxes that lack CAP_SYS_RESOURCE (kubelet asks runc to
-# set oom_score_adj=-998 for pod sandboxes, which such sandboxes forbid).
-# Enabled only when CLAVURE_K3S_RESTRICT_OOM=1.
+# SPDX-License-Identifier: Apache-2.0
+# Third-party derived file (not covered by Clavure's MIT license).
+# Derived from the containerd configuration that K3s v1.34.1 generates from its
+# built-in template (https://github.com/k3s-io/k3s), Copyright The K3s Authors,
+# licensed under the Apache License, Version 2.0 (see LICENSES/Apache-2.0.txt).
+# Modification by Clavure contributors: added `restrict_oom_score_adj = true`.
+#
+# Why: nested sandboxes that lack CAP_SYS_RESOURCE reject kubelet's request to
+# set oom_score_adj=-998 for pod sandboxes. Used only when
+# CLAVURE_K3S_RESTRICT_OOM=1.
 version = 3
 root = "/var/lib/rancher/k3s/agent/containerd"
 state = "/run/k3s/containerd"
