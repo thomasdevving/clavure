@@ -1,0 +1,1041 @@
+{
+  "artifact": "topology",
+  "clavure_version": "0.1.0",
+  "generated_at": "2026-10-08T16:50:12+00:00",
+  "scenario": "ecommerce-demo",
+  "requirements_fingerprint": "sha256:f07bf089a507133fb5ee19b0fddf51b6ac9e8003bc737d99b3cf60aa687c0780",
+  "manifest_sources": [
+    "demo/manifests/base",
+    "demo/manifests/change-analytics"
+  ],
+  "inputs_digest": "sha256:3b5009b8b303e0dff7451b4c1da38209139d75de63641f8a499dac9e362be7b7",
+  "nodes": [
+    {
+      "id": "clavure-analytics/allow-dns-egress",
+      "type": "policy",
+      "name": "allow-dns-egress",
+      "namespace": "clavure-analytics",
+      "pod_selector": "{} (all)",
+      "policy_types": [
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/22-analytics-policies.yaml#1"
+    },
+    {
+      "id": "clavure-analytics/default-deny-all",
+      "type": "policy",
+      "name": "default-deny-all",
+      "namespace": "clavure-analytics",
+      "pod_selector": "{} (all)",
+      "policy_types": [
+        "Ingress",
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/22-analytics-policies.yaml#0"
+    },
+    {
+      "id": "clavure-analytics/reporting-egress-data",
+      "type": "policy",
+      "name": "reporting-egress-data",
+      "namespace": "clavure-analytics",
+      "pod_selector": "app=reporting",
+      "policy_types": [
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/change-analytics/30-reporting-data-access.yaml#1"
+    },
+    {
+      "id": "clavure-data/allow-analytics-to-data-tier",
+      "type": "policy",
+      "name": "allow-analytics-to-data-tier",
+      "namespace": "clavure-data",
+      "pod_selector": "tier=data",
+      "policy_types": [
+        "Ingress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/change-analytics/30-reporting-data-access.yaml#0"
+    },
+    {
+      "id": "clavure-data/default-deny-all",
+      "type": "policy",
+      "name": "default-deny-all",
+      "namespace": "clavure-data",
+      "pod_selector": "{} (all)",
+      "policy_types": [
+        "Ingress",
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/21-data-policies.yaml#0"
+    },
+    {
+      "id": "clavure-data/finance-db-ingress",
+      "type": "policy",
+      "name": "finance-db-ingress",
+      "namespace": "clavure-data",
+      "pod_selector": "app=finance-db",
+      "policy_types": [
+        "Ingress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/21-data-policies.yaml#2"
+    },
+    {
+      "id": "clavure-data/orders-db-ingress",
+      "type": "policy",
+      "name": "orders-db-ingress",
+      "namespace": "clavure-data",
+      "pod_selector": "app=orders-db",
+      "policy_types": [
+        "Ingress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/21-data-policies.yaml#1"
+    },
+    {
+      "id": "clavure-shop/allow-dns-egress",
+      "type": "policy",
+      "name": "allow-dns-egress",
+      "namespace": "clavure-shop",
+      "pod_selector": "{} (all)",
+      "policy_types": [
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#1"
+    },
+    {
+      "id": "clavure-shop/default-deny-all",
+      "type": "policy",
+      "name": "default-deny-all",
+      "namespace": "clavure-shop",
+      "pod_selector": "{} (all)",
+      "policy_types": [
+        "Ingress",
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#0"
+    },
+    {
+      "id": "clavure-shop/order-service-egress",
+      "type": "policy",
+      "name": "order-service-egress",
+      "namespace": "clavure-shop",
+      "pod_selector": "app=order-service",
+      "policy_types": [
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#5"
+    },
+    {
+      "id": "clavure-shop/order-service-ingress",
+      "type": "policy",
+      "name": "order-service-ingress",
+      "namespace": "clavure-shop",
+      "pod_selector": "app=order-service",
+      "policy_types": [
+        "Ingress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#4"
+    },
+    {
+      "id": "clavure-shop/payment-service-egress",
+      "type": "policy",
+      "name": "payment-service-egress",
+      "namespace": "clavure-shop",
+      "pod_selector": "app=payment-service",
+      "policy_types": [
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#7"
+    },
+    {
+      "id": "clavure-shop/payment-service-ingress",
+      "type": "policy",
+      "name": "payment-service-ingress",
+      "namespace": "clavure-shop",
+      "pod_selector": "app=payment-service",
+      "policy_types": [
+        "Ingress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#6"
+    },
+    {
+      "id": "clavure-shop/storefront-egress",
+      "type": "policy",
+      "name": "storefront-egress",
+      "namespace": "clavure-shop",
+      "pod_selector": "app=storefront",
+      "policy_types": [
+        "Egress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#3"
+    },
+    {
+      "id": "clavure-shop/storefront-ingress",
+      "type": "policy",
+      "name": "storefront-ingress",
+      "namespace": "clavure-shop",
+      "pod_selector": "app=storefront",
+      "policy_types": [
+        "Ingress"
+      ],
+      "origin": "manifest",
+      "source": "demo/manifests/base/20-shop-policies.yaml#2"
+    },
+    {
+      "id": "ns:clavure-analytics",
+      "type": "namespace",
+      "name": "clavure-analytics",
+      "labels": {
+        "clavure.io/test-env": "true",
+        "kubernetes.io/metadata.name": "clavure-analytics",
+        "zone": "analytics"
+      },
+      "labels_known": true
+    },
+    {
+      "id": "ns:clavure-data",
+      "type": "namespace",
+      "name": "clavure-data",
+      "labels": {
+        "clavure.io/test-env": "true",
+        "kubernetes.io/metadata.name": "clavure-data",
+        "zone": "data"
+      },
+      "labels_known": true
+    },
+    {
+      "id": "ns:clavure-shop",
+      "type": "namespace",
+      "name": "clavure-shop",
+      "labels": {
+        "clavure.io/test-env": "true",
+        "kubernetes.io/metadata.name": "clavure-shop",
+        "zone": "commerce"
+      },
+      "labels_known": true
+    },
+    {
+      "id": "clavure-analytics/reporting",
+      "type": "service",
+      "name": "reporting",
+      "namespace": "clavure-analytics",
+      "ports": [
+        {
+          "port": 80,
+          "targetPort": "http",
+          "protocol": "TCP"
+        }
+      ]
+    },
+    {
+      "id": "clavure-data/finance-db",
+      "type": "service",
+      "name": "finance-db",
+      "namespace": "clavure-data",
+      "ports": [
+        {
+          "port": 5432,
+          "targetPort": "db",
+          "protocol": "TCP"
+        },
+        {
+          "port": 9187,
+          "targetPort": "metrics",
+          "protocol": "TCP"
+        }
+      ]
+    },
+    {
+      "id": "clavure-data/orders-db",
+      "type": "service",
+      "name": "orders-db",
+      "namespace": "clavure-data",
+      "ports": [
+        {
+          "port": 5432,
+          "targetPort": "db",
+          "protocol": "TCP"
+        },
+        {
+          "port": 9187,
+          "targetPort": "metrics",
+          "protocol": "TCP"
+        }
+      ]
+    },
+    {
+      "id": "clavure-shop/order-service",
+      "type": "service",
+      "name": "order-service",
+      "namespace": "clavure-shop",
+      "ports": [
+        {
+          "port": 80,
+          "targetPort": "http",
+          "protocol": "TCP"
+        }
+      ]
+    },
+    {
+      "id": "clavure-shop/payment-service",
+      "type": "service",
+      "name": "payment-service",
+      "namespace": "clavure-shop",
+      "ports": [
+        {
+          "port": 80,
+          "targetPort": "http",
+          "protocol": "TCP"
+        }
+      ]
+    },
+    {
+      "id": "clavure-shop/storefront",
+      "type": "service",
+      "name": "storefront",
+      "namespace": "clavure-shop",
+      "ports": [
+        {
+          "port": 80,
+          "targetPort": "http",
+          "protocol": "TCP"
+        }
+      ]
+    },
+    {
+      "id": "clavure-analytics/reporting",
+      "type": "workload",
+      "kind": "Deployment",
+      "name": "reporting",
+      "namespace": "clavure-analytics",
+      "logical_name": "reporting",
+      "labels": {
+        "app": "reporting",
+        "role": "analytics",
+        "team": "analytics",
+        "tier": "backend"
+      },
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "protocol": "TCP"
+        }
+      ],
+      "criticality": "medium",
+      "protected": false,
+      "ingress_isolated": true,
+      "egress_isolated": true,
+      "source": "demo/manifests/base/12-analytics-workloads.yaml#0"
+    },
+    {
+      "id": "clavure-data/finance-db",
+      "type": "workload",
+      "kind": "Deployment",
+      "name": "finance-db",
+      "namespace": "clavure-data",
+      "logical_name": "finance-db",
+      "labels": {
+        "app": "finance-db",
+        "data-classification": "restricted",
+        "team": "payments",
+        "tier": "data"
+      },
+      "ports": [
+        {
+          "name": "db",
+          "port": 5432,
+          "protocol": "TCP"
+        },
+        {
+          "name": "metrics",
+          "port": 9187,
+          "protocol": "TCP"
+        }
+      ],
+      "criticality": "high",
+      "protected": true,
+      "ingress_isolated": true,
+      "egress_isolated": true,
+      "source": "demo/manifests/base/11-data-workloads.yaml#2"
+    },
+    {
+      "id": "clavure-data/orders-db",
+      "type": "workload",
+      "kind": "Deployment",
+      "name": "orders-db",
+      "namespace": "clavure-data",
+      "logical_name": "orders-db",
+      "labels": {
+        "app": "orders-db",
+        "team": "commerce",
+        "tier": "data"
+      },
+      "ports": [
+        {
+          "name": "db",
+          "port": 5432,
+          "protocol": "TCP"
+        },
+        {
+          "name": "metrics",
+          "port": 9187,
+          "protocol": "TCP"
+        }
+      ],
+      "criticality": "high",
+      "protected": false,
+      "ingress_isolated": true,
+      "egress_isolated": true,
+      "source": "demo/manifests/base/11-data-workloads.yaml#0"
+    },
+    {
+      "id": "clavure-shop/order-service",
+      "type": "workload",
+      "kind": "Deployment",
+      "name": "order-service",
+      "namespace": "clavure-shop",
+      "logical_name": "order-service",
+      "labels": {
+        "app": "order-service",
+        "team": "commerce",
+        "tier": "backend"
+      },
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "protocol": "TCP"
+        }
+      ],
+      "criticality": "high",
+      "protected": false,
+      "ingress_isolated": true,
+      "egress_isolated": true,
+      "source": "demo/manifests/base/10-shop-workloads.yaml#2"
+    },
+    {
+      "id": "clavure-shop/payment-service",
+      "type": "workload",
+      "kind": "Deployment",
+      "name": "payment-service",
+      "namespace": "clavure-shop",
+      "logical_name": "payment-service",
+      "labels": {
+        "app": "payment-service",
+        "team": "payments",
+        "tier": "backend"
+      },
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "protocol": "TCP"
+        }
+      ],
+      "criticality": "high",
+      "protected": false,
+      "ingress_isolated": true,
+      "egress_isolated": true,
+      "source": "demo/manifests/base/10-shop-workloads.yaml#4"
+    },
+    {
+      "id": "clavure-shop/storefront",
+      "type": "workload",
+      "kind": "Deployment",
+      "name": "storefront",
+      "namespace": "clavure-shop",
+      "logical_name": "storefront",
+      "labels": {
+        "app": "storefront",
+        "team": "commerce",
+        "tier": "web"
+      },
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "protocol": "TCP"
+        }
+      ],
+      "criticality": "high",
+      "protected": false,
+      "ingress_isolated": true,
+      "egress_isolated": true,
+      "source": "demo/manifests/base/10-shop-workloads.yaml#0"
+    }
+  ],
+  "edges": [
+    {
+      "from": "wl:clavure-analytics/reporting",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "connectivity",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-REPORTING-FINANCEDB"
+      ],
+      "policies": [
+        "clavure-analytics/allow-dns-egress",
+        "clavure-analytics/default-deny-all",
+        "clavure-analytics/reporting-egress-data",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "evidence": [
+        "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; permitted by clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432.",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; permitted by clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432."
+      ]
+    },
+    {
+      "from": "wl:clavure-analytics/reporting",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "connectivity",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-REPORTING-FINANCEDB"
+      ],
+      "policies": [
+        "clavure-analytics/allow-dns-egress",
+        "clavure-analytics/default-deny-all",
+        "clavure-analytics/reporting-egress-data",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [],
+      "evidence": [
+        "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; no rule of any selecting policy matches (policies are allow-lists).",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      ]
+    },
+    {
+      "from": "wl:clavure-analytics/reporting",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "connectivity",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-REPORTING-ORDERS"
+      ],
+      "policies": [
+        "clavure-analytics/allow-dns-egress",
+        "clavure-analytics/default-deny-all",
+        "clavure-analytics/reporting-egress-data",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/orders-db-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "evidence": [
+        "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; permitted by clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432.",
+        "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; permitted by clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/order-service",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "connectivity",
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-ORDERS-ORDERSDB"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/order-service-egress",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/orders-db-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-shop/order-service-egress egress[0] peers[0] on TCP/5432",
+        "clavure-data/orders-db-ingress ingress[0] peers[0] on TCP/5432"
+      ],
+      "evidence": [
+        "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; permitted by clavure-shop/order-service-egress egress[0] peers[0] on TCP/5432.",
+        "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; permitted by clavure-data/orders-db-ingress ingress[0] peers[0] on TCP/5432."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/order-service",
+      "to": "wl:clavure-shop/payment-service",
+      "kind": "connectivity",
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-shop/payment-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-ORDERS-PAYMENT"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/order-service-egress",
+        "clavure-shop/payment-service-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-shop/order-service-egress egress[1] peers[0] on TCP/8080",
+        "clavure-shop/payment-service-ingress ingress[0] peers[0] on TCP/http"
+      ],
+      "evidence": [
+        "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; permitted by clavure-shop/order-service-egress egress[1] peers[0] on TCP/8080.",
+        "Ingress to clavure-shop/payment-service: isolated by [clavure-shop/default-deny-all, clavure-shop/payment-service-ingress]; permitted by clavure-shop/payment-service-ingress ingress[0] peers[0] on TCP/http."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/payment-service",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "connectivity",
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-PAYMENT-FINANCEDB"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/payment-service-egress",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-shop/payment-service-egress egress[0] peers[0] on TCP/5432",
+        "clavure-data/finance-db-ingress ingress[0] peers[0] on TCP/5432"
+      ],
+      "evidence": [
+        "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; permitted by clavure-shop/payment-service-egress egress[0] peers[0] on TCP/5432.",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; permitted by clavure-data/finance-db-ingress ingress[0] peers[0] on TCP/5432."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/storefront",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "connectivity",
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-STOREFRONT-FINANCEDB"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/storefront-egress",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [],
+      "evidence": [
+        "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists).",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/storefront",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "connectivity",
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-STOREFRONT-FINANCEDB"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/storefront-egress",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [],
+      "evidence": [
+        "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists).",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/storefront",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "connectivity",
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-STOREFRONT-ORDERSDB"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/storefront-egress",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/orders-db-ingress"
+      ],
+      "permitting_rules": [],
+      "evidence": [
+        "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists).",
+        "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/storefront",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "connectivity",
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/orders-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-STOREFRONT-ORDERSDB"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/storefront-egress",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/orders-db-ingress"
+      ],
+      "permitting_rules": [],
+      "evidence": [
+        "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists).",
+        "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      ]
+    },
+    {
+      "from": "wl:clavure-shop/storefront",
+      "to": "wl:clavure-shop/order-service",
+      "kind": "connectivity",
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-shop/order-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-STOREFRONT-ORDERS"
+      ],
+      "policies": [
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/storefront-egress",
+        "clavure-shop/order-service-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-shop/storefront-egress egress[0] peers[0] on TCP/8080",
+        "clavure-shop/order-service-ingress ingress[0] peers[0] on TCP/8080"
+      ],
+      "evidence": [
+        "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; permitted by clavure-shop/storefront-egress egress[0] peers[0] on TCP/8080.",
+        "Ingress to clavure-shop/order-service: isolated by [clavure-shop/default-deny-all, clavure-shop/order-service-ingress]; permitted by clavure-shop/order-service-ingress ingress[0] peers[0] on TCP/8080."
+      ]
+    },
+    {
+      "from": "wl:clavure-analytics/reporting",
+      "to": "ns:clavure-analytics",
+      "kind": "member_of"
+    },
+    {
+      "from": "wl:clavure-data/finance-db",
+      "to": "ns:clavure-data",
+      "kind": "member_of"
+    },
+    {
+      "from": "wl:clavure-data/orders-db",
+      "to": "ns:clavure-data",
+      "kind": "member_of"
+    },
+    {
+      "from": "wl:clavure-shop/order-service",
+      "to": "ns:clavure-shop",
+      "kind": "member_of"
+    },
+    {
+      "from": "wl:clavure-shop/payment-service",
+      "to": "ns:clavure-shop",
+      "kind": "member_of"
+    },
+    {
+      "from": "wl:clavure-shop/storefront",
+      "to": "ns:clavure-shop",
+      "kind": "member_of"
+    },
+    {
+      "from": "svc:clavure-analytics/reporting",
+      "to": "wl:clavure-analytics/reporting",
+      "kind": "routes_to"
+    },
+    {
+      "from": "svc:clavure-data/finance-db",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "routes_to"
+    },
+    {
+      "from": "svc:clavure-data/orders-db",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "routes_to"
+    },
+    {
+      "from": "svc:clavure-shop/order-service",
+      "to": "wl:clavure-shop/order-service",
+      "kind": "routes_to"
+    },
+    {
+      "from": "svc:clavure-shop/payment-service",
+      "to": "wl:clavure-shop/payment-service",
+      "kind": "routes_to"
+    },
+    {
+      "from": "svc:clavure-shop/storefront",
+      "to": "wl:clavure-shop/storefront",
+      "kind": "routes_to"
+    },
+    {
+      "from": "np:clavure-analytics/allow-dns-egress",
+      "to": "wl:clavure-analytics/reporting",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-analytics/default-deny-all",
+      "to": "wl:clavure-analytics/reporting",
+      "kind": "selects",
+      "directions": [
+        "Ingress",
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-analytics/reporting-egress-data",
+      "to": "wl:clavure-analytics/reporting",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-data/allow-analytics-to-data-tier",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    },
+    {
+      "from": "np:clavure-data/allow-analytics-to-data-tier",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    },
+    {
+      "from": "np:clavure-data/default-deny-all",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "selects",
+      "directions": [
+        "Ingress",
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-data/default-deny-all",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "selects",
+      "directions": [
+        "Ingress",
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-data/finance-db-ingress",
+      "to": "wl:clavure-data/finance-db",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    },
+    {
+      "from": "np:clavure-data/orders-db-ingress",
+      "to": "wl:clavure-data/orders-db",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/allow-dns-egress",
+      "to": "wl:clavure-shop/order-service",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/allow-dns-egress",
+      "to": "wl:clavure-shop/payment-service",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/allow-dns-egress",
+      "to": "wl:clavure-shop/storefront",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/default-deny-all",
+      "to": "wl:clavure-shop/order-service",
+      "kind": "selects",
+      "directions": [
+        "Ingress",
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/default-deny-all",
+      "to": "wl:clavure-shop/payment-service",
+      "kind": "selects",
+      "directions": [
+        "Ingress",
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/default-deny-all",
+      "to": "wl:clavure-shop/storefront",
+      "kind": "selects",
+      "directions": [
+        "Ingress",
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/order-service-egress",
+      "to": "wl:clavure-shop/order-service",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/order-service-ingress",
+      "to": "wl:clavure-shop/order-service",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/payment-service-egress",
+      "to": "wl:clavure-shop/payment-service",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/payment-service-ingress",
+      "to": "wl:clavure-shop/payment-service",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/storefront-egress",
+      "to": "wl:clavure-shop/storefront",
+      "kind": "selects",
+      "directions": [
+        "Egress"
+      ]
+    },
+    {
+      "from": "np:clavure-shop/storefront-ingress",
+      "to": "wl:clavure-shop/storefront",
+      "kind": "selects",
+      "directions": [
+        "Ingress"
+      ]
+    }
+  ],
+  "unsupported_features": [],
+  "ignored_kinds": {},
+  "consistency_issues": []
+}

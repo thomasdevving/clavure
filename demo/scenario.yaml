@@ -1,0 +1,99 @@
+# TRUSTED SECURITY REQUIREMENTS — protected file (see CODEOWNERS).
+#
+# This file declares what the business needs (required connections) and what
+# must never happen (forbidden connections). Clavure's optimizer and verifiers
+# READ it; no automated agent (GitLab Duo flow, adversarial agent) may change
+# it. CI job `guard:trusted-files` fails any merge request that modifies it
+# without code-owner approval.
+apiVersion: clavure.io/v1alpha1
+kind: SecurityRequirements
+metadata:
+  name: ecommerce-demo
+spec:
+  # Runtime testing is only ever performed inside these namespaces, and only
+  # when they carry the label clavure.io/test-env=true.
+  testEnvironment:
+    namespaces: [clavure-shop, clavure-data, clavure-analytics]
+    requiredNamespaceLabel: clavure.io/test-env=true
+
+  workloads:
+    storefront:      {namespace: clavure-shop,      deployment: storefront,      service: storefront,      criticality: high}
+    order-service:   {namespace: clavure-shop,      deployment: order-service,   service: order-service,   criticality: high}
+    payment-service: {namespace: clavure-shop,      deployment: payment-service, service: payment-service, criticality: high}
+    orders-db:       {namespace: clavure-data,      deployment: orders-db,       service: orders-db,       criticality: high}
+    finance-db:      {namespace: clavure-data,      deployment: finance-db,      service: finance-db,      criticality: high, protected: true}
+    reporting:       {namespace: clavure-analytics, deployment: reporting,       service: reporting,       criticality: medium}
+
+  # Ports are the ports the *client* addresses, i.e. Service ports when
+  # `viaService` is true. Clavure maps them to target (pod) ports, which is
+  # what NetworkPolicy evaluates.
+  required:
+    - id: REQ-STOREFRONT-ORDERS
+      source: storefront
+      destination: order-service
+      port: 80
+      viaService: true
+      description: Storefront submits customer orders to the order service.
+    - id: REQ-ORDERS-ORDERSDB
+      source: order-service
+      destination: orders-db
+      port: 5432
+      viaService: true
+      description: Order service persists orders.
+    - id: REQ-ORDERS-PAYMENT
+      source: order-service
+      destination: payment-service
+      port: 80
+      viaService: true
+      description: Order service requests payment for each order.
+    - id: REQ-PAYMENT-FINANCEDB
+      source: payment-service
+      destination: finance-db
+      port: 5432
+      viaService: true
+      description: Payment service records ledger entries.
+    - id: REQ-REPORTING-ORDERS
+      source: reporting
+      destination: orders-db
+      port: 5432
+      viaService: true
+      description: Reporting service reads order data for dashboards.
+
+  # `port: any` forbids every TCP port the destination pod exposes, reached
+  # either through its Service or directly by pod IP.
+  forbidden:
+    - id: FORBID-REPORTING-FINANCEDB
+      source: reporting
+      destination: finance-db
+      port: any
+      description: Analytics workloads must never reach restricted financial data.
+    - id: FORBID-STOREFRONT-FINANCEDB
+      source: storefront
+      destination: finance-db
+      port: any
+      description: Internet-facing tier must never reach financial data.
+    - id: FORBID-STOREFRONT-ORDERSDB
+      source: storefront
+      destination: orders-db
+      port: any
+      description: Internet-facing tier must go through the order service.
+
+  businessWorkflows:
+    - id: WF-CHECKOUT
+      description: >-
+        A customer checkout through the storefront creates an order record in
+        orders-db and a ledger entry in finance-db.
+      entrypoint: {workload: storefront, method: POST, path: /checkout}
+      dependsOn: [REQ-STOREFRONT-ORDERS, REQ-ORDERS-ORDERSDB, REQ-ORDERS-PAYMENT, REQ-PAYMENT-FINANCEDB]
+      stateChecks:
+        - {workload: orders-db, table: orders, expect: new-record-with-correlation-id}
+        - {workload: finance-db, table: ledger, expect: new-record-with-correlation-id}
+    - id: WF-REPORTING
+      description: The reporting service builds an order summary from orders-db.
+      entrypoint: {workload: reporting, method: GET, path: /report}
+      dependsOn: [REQ-REPORTING-ORDERS]
+      stateChecks: []
+
+  # Cost-model inputs (objectives only, never hard constraints).
+  optimization:
+    maxActionsPerPlan: 3

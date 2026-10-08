@@ -1,0 +1,149 @@
+# Data tier: synthetic orders and finance databases (line-protocol emulators, synthetic data only).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-db
+  namespace: clavure-data
+  labels:
+    app: orders-db
+  annotations:
+    clavure.io/criticality: high
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-db
+  template:
+    metadata:
+      labels:
+        app: orders-db
+        tier: data
+        team: commerce
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: clavure-demo:0.1.0
+          imagePullPolicy: Never
+          args: ["serve"]
+          env:
+            - name: CLAVURE_ROLE
+              value: orders-db
+          ports:
+            - name: db
+              containerPort: 5432
+              protocol: TCP
+            - name: metrics
+              containerPort: 9187
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: db
+            periodSeconds: 3
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-db
+  namespace: clavure-data
+spec:
+  selector:
+    app: orders-db
+  ports:
+    - name: db
+      port: 5432
+      targetPort: db
+      protocol: TCP
+    - name: metrics
+      port: 9187
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finance-db
+  namespace: clavure-data
+  labels:
+    app: finance-db
+  annotations:
+    clavure.io/criticality: high
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finance-db
+  template:
+    metadata:
+      labels:
+        app: finance-db
+        tier: data
+        team: payments
+        data-classification: restricted
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: clavure-demo:0.1.0
+          imagePullPolicy: Never
+          args: ["serve"]
+          env:
+            - name: CLAVURE_ROLE
+              value: finance-db
+          ports:
+            - name: db
+              containerPort: 5432
+              protocol: TCP
+            - name: metrics
+              containerPort: 9187
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: db
+            periodSeconds: 3
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: finance-db
+  namespace: clavure-data
+spec:
+  selector:
+    app: finance-db
+  ports:
+    - name: db
+      port: 5432
+      targetPort: db
+      protocol: TCP
+    - name: metrics
+      port: 9187
+      targetPort: metrics
+      protocol: TCP

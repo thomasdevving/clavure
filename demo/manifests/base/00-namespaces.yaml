@@ -1,0 +1,28 @@
+# Clavure demo e-commerce platform — namespaces.
+#
+# All demo namespaces carry `clavure.io/test-env: "true"`. Clavure's runtime
+# controller refuses to create, modify, or probe anything in a namespace that
+# does not carry this label (see docs/security-model.md).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clavure-shop
+  labels:
+    clavure.io/test-env: "true"
+    zone: commerce
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clavure-data
+  labels:
+    clavure.io/test-env: "true"
+    zone: data
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clavure-analytics
+  labels:
+    clavure.io/test-env: "true"
+    zone: analytics

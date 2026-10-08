@@ -1,0 +1,56 @@
+# Data namespace NetworkPolicies (baseline, least-privilege).
+#
+# Each database accepts its single declared client only. Databases need no
+# egress at all, so egress stays fully denied.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: clavure-data
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: orders-db-ingress
+  namespace: clavure-data
+spec:
+  podSelector:
+    matchLabels:
+      app: orders-db
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: clavure-shop
+          podSelector:
+            matchLabels:
+              app: order-service
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: finance-db-ingress
+  namespace: clavure-data
+spec:
+  podSelector:
+    matchLabels:
+      app: finance-db
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: clavure-shop
+          podSelector:
+            matchLabels:
+              app: payment-service
+      ports:
+        - protocol: TCP
+          port: 5432

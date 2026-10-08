@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #dcdcd6;
+  --ok: #1f7a4d; --ok-bg: #e3f3ea; --bad: #b42318; --bad-bg: #fde7e4; --warn: #9a6200; --warn-bg: #fff3d6;
+  --info: #1d5fa8; --info-bg: #e3eefb; --accent: #3d3d8f;
+  --req: #1f7a4d; --forb: #c8281b; --new: #d97706; --rem: #8a8a84; --allowed: #5b6b8c;
+  --ns: #efefea; --node: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151514; --panel: #1f1f1d; --text: #ecece8; --muted: #a3a39c; --line: #3a3a36;
+    --ok: #5ccf94; --ok-bg: #173527; --bad: #ff8a7a; --bad-bg: #3d1a16; --warn: #f2bd4a; --warn-bg: #3a2d10;
+    --info: #8db8f2; --info-bg: #182a40; --accent: #a5a5f0;
+    --req: #5ccf94; --forb: #ff6b5b; --new: #f5a524; --rem: #85857e; --allowed: #9aa9c9;
+    --ns: #262624; --node: #2b2b28;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+header { padding: 28px 16px 8px; max-width: 1200px; margin: 0 auto; }
+header h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: -0.01em; }
+header p { margin: 2px 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 16px 48px; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin: 18px 0; overflow-x: auto; }
+h2 { font-size: 19px; margin: 0 0 10px; }
+h3 { font-size: 15px; margin: 18px 0 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+tr.selected td { background: var(--ok-bg); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+pre { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+details { margin-top: 6px; }
+summary { cursor: pointer; color: var(--accent); }
+.small { font-size: 12.5px; }
+.muted { color: var(--muted); }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.badge.ok { color: var(--ok); background: var(--ok-bg); }
+.badge.bad { color: var(--bad); background: var(--bad-bg); }
+.badge.warn { color: var(--warn); background: var(--warn-bg); }
+.badge.info { color: var(--info); background: var(--info-bg); }
+.badge.muted { color: var(--muted); background: var(--bg); border: 1px solid var(--line); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.card-k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.card-v { margin-top: 4px; font-size: 14px; overflow-wrap: anywhere; }
+svg.graph { width: 100%; max-width: 900px; height: auto; display: block; margin: 8px 0; }
+.ns { fill: var(--ns); stroke: var(--line); }
+.ns-label { fill: var(--muted); font-size: 12px; font-weight: 600; }
+.node rect { fill: var(--node); stroke: var(--allowed); stroke-width: 1.4; }
+.node.protected rect { stroke: var(--forb); stroke-width: 2.2; }
+.node-label { fill: var(--text); font-size: 13px; font-weight: 600; text-anchor: middle; }
+.node-sub { fill: var(--muted); font-size: 10.5px; text-anchor: middle; }
+.edge { fill: none; stroke-width: 1.8; }
+.edge.required { stroke: var(--req); }
+.edge.allowed { stroke: var(--allowed); }
+.edge.forbidden-allowed { stroke: var(--forb); stroke-width: 3.2; }
+.edge.new { stroke: var(--new); stroke-dasharray: 6 4; stroke-width: 2.4; }
+.edge.remediated { stroke: var(--rem); stroke-dasharray: 3 4; }
+.ah-required { fill: var(--req); } .ah-allowed { fill: var(--allowed); } .ah-forbidden { fill: var(--forb); }
+.ah-new { fill: var(--new); } .ah-remediated { fill: var(--rem); }
+.edge-label { font-size: 10.5px; text-anchor: middle; fill: var(--muted); paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+.edge-label.forbidden-allowed { fill: var(--forb); font-weight: 700; }
+.edge-label.new { fill: var(--new); font-weight: 600; }
+.legend { font-size: 12.5px; color: var(--muted); }
+.sw { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin: 0 4px 0 12px; }
+.sw.required { border-color: var(--req); } .sw.allowed { border-color: var(--allowed); }
+.sw.forbidden-allowed { border-color: var(--forb); } .sw.new { border-color: var(--new); border-top-style: dashed; }
+.sw.remediated { border-color: var(--rem); border-top-style: dotted; }
+nav { max-width: 1200px; margin: 0 auto; padding: 4px 16px; font-size: 13px; }
+nav a { color: var(--accent); margin-right: 12px; text-decoration: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Clavure security report</h1>
+  <p>Scenario <strong>{{scenario}}</strong> · generated {{generated}}</p>
+  <p>Requirements fingerprint <code>{{fingerprint}}</code></p>
+</header>
+<nav><a href="#before">Before</a><a href="#change">Change</a><a href="#runtime-before">Runtime</a><a href="#adversarial">Adversarial</a><a href="#options">Options</a><a href="#after">After</a><a href="#timeline">Timeline</a><a href="#limits">Limitations</a></nav>
+<main>
+{{content}}
+</main>
+</body>
+</html>

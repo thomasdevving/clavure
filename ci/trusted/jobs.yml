@@ -1,0 +1,186 @@
+# Clavure trusted CI job templates.
+#
+# Every job that DECIDES a security outcome (guard, independent verification,
+# gate, runtime verification, deployment check) installs Clavure from the
+# protected DEFAULT branch, never from the code under test. It reads the
+# requirements, the trusted-file list and the manifest roots from that branch
+# too. Only the manifests under test come from the merge request.
+#
+# Where these definitions come from decides whether an MR can change them;
+# see ci/trusted/README.md:
+#   * in-repo (.gitlab-ci.yml includes ci/trusted/pipeline.yml): NOT enforced,
+#     because an MR can edit this file;
+#   * external CI config file in a protected project (all tiers): enforced;
+#   * pipeline execution policy (Ultimate): enforced, isolated YAML.
+#
+# Supply chain: images are pinned by digest, binaries by SHA-256, Python
+# packages by hash (requirements*.lock, pip --require-hashes).
+
+# python:3.12 (Debian; ships git, curl, bash). Digest from mirror.gcr.io and
+# public.ecr.aws (identical), 2026-10-08.
+.clavure-trusted-image:
+  image: python:3.12@sha256:63828510c8b5ccce3bf0d6fabd6f3d17d4effa1ffe690f80a67c8e2d394e03ee
+
+.clavure-trusted-bootstrap:
+  script:
+    - |
+      set -euo pipefail
+      test -n "${CI_DEFAULT_BRANCH:-}" || { echo "CI_DEFAULT_BRANCH is not set"; exit 1; }
+      git config --global --add safe.directory "$CI_PROJECT_DIR"
+      git -C "$CI_PROJECT_DIR" fetch --quiet --depth=500 origin "$CI_DEFAULT_BRANCH"
+      rm -rf /tmp/trusted
+      git -C "$CI_PROJECT_DIR" worktree add --detach /tmp/trusted "origin/$CI_DEFAULT_BRANCH"
+      python3 -m venv /tmp/trusted-venv
+      /tmp/trusted-venv/bin/pip install --quiet --require-hashes \
+        -r /tmp/trusted/requirements.lock -r /tmp/trusted/requirements-build.lock
+      /tmp/trusted-venv/bin/pip install --quiet --no-deps --no-build-isolation /tmp/trusted
+      echo "Trusted Clavure: origin/$CI_DEFAULT_BRANCH @ $(git -C /tmp/trusted rev-parse HEAD)"
+
+# Merge request gate: one job so that no MR-controlled job can produce the
+# artifacts the gate decides on.
+.clavure-trusted-mr-gate:
+  extends: .clavure-trusted-image
+  variables:
+    GIT_DEPTH: "0"
+    OUT: "$CI_PROJECT_DIR/artifacts/trusted"
+  allow_failure: false
+  interruptible: false
+  before_script:
+    - !reference [.clavure-trusted-bootstrap, script]
+  script:
+    - |
+      set -euo pipefail
+      mkdir -p "$OUT"
+      TARGET="$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+      git -C "$CI_PROJECT_DIR" fetch --quiet --depth=500 origin "$TARGET"
+      rm -rf /tmp/target
+      git -C "$CI_PROJECT_DIR" worktree add --detach /tmp/target "origin/$TARGET"
+      cd /tmp
+      # 1. Trusted-file guard (file list from the default branch).
+      /tmp/trusted-venv/bin/clavure guard --base-ref "$CI_MERGE_REQUEST_DIFF_BASE_SHA" \
+        --config /tmp/trusted/.clavure.yaml --repo "$CI_PROJECT_DIR" > "$OUT/guard.json" || true
+      # 2. Independent verifier: requirements from the default branch, MR
+      #    manifests, no-new-connectivity against the target branch.
+      /tmp/trusted-venv/bin/python -m clavure.verification.trusted_ci \
+        --trusted-root /tmp/trusted --baseline-root /tmp/target \
+        --mr-root "$CI_PROJECT_DIR" --out "$OUT" || true
+      # 3. Findings and remediation plan for reviewers.
+      (cd "$CI_PROJECT_DIR" && /tmp/trusted-venv/bin/clavure mr-check \
+        --trusted-root /tmp/trusted --target-ref "origin/$TARGET" --out "$OUT/mr-check") || true
+      # 4. Decision.
+      /tmp/trusted-venv/bin/clavure gate --artifacts "$OUT"
+  artifacts:
+    when: always
+    expose_as: "Clavure trusted security gate"
+    paths: [artifacts/trusted/]
+
+# Default-branch and tag gate. Required by deploy:staging and releases.
+.clavure-trusted-branch-gate:
+  extends: .clavure-trusted-image
+  variables:
+    GIT_DEPTH: "0"
+    OUT: "$CI_PROJECT_DIR/artifacts/trusted"
+  allow_failure: false
+  interruptible: false
+  before_script:
+    - !reference [.clavure-trusted-bootstrap, script]
+  script:
+    - |
+      set -euo pipefail
+      test "${CI_COMMIT_REF_PROTECTED:-false}" = "true" || { echo "Refusing: ref $CI_COMMIT_REF_NAME is not protected"; exit 1; }
+      mkdir -p "$OUT"
+      cd /tmp
+      /tmp/trusted-venv/bin/python -m clavure.verification.trusted_ci \
+        --trusted-root /tmp/trusted --mr-root "$CI_PROJECT_DIR" --out "$OUT" || true
+      /tmp/trusted-venv/bin/clavure gate --artifacts "$OUT"
+      printf '{"pass": true, "commit": "%s", "pipeline": "%s"}\n' "$CI_COMMIT_SHA" "$CI_PIPELINE_ID" > "$OUT/gate-passed.json"
+  artifacts:
+    when: always
+    paths: [artifacts/trusted/]
+
+# Real runtime verification on a disposable k3d cluster (docker-in-docker).
+# Probes and the demo app image are built from the trusted default branch, so
+# the MR cannot change how results are measured.
+.clavure-trusted-runtime:
+  extends: .clavure-trusted-image
+  services:
+    # docker:27.5.1-dind, digest from mirror.gcr.io, 2026-10-08.
+    - name: docker:27.5.1-dind@sha256:aa3df78ecf320f5fafdce71c659f1629e96e9de0968305fe1de670e0ca9176ce
+      alias: docker
+  variables:
+    GIT_DEPTH: "0"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    CLAVURE_K3D_API_HOST: docker
+    # k3d helper image pinned by digest (ghcr.io registry, 2026-10-08).
+    K3D_IMAGE_TOOLS: "ghcr.io/k3d-io/k3d-tools:5.7.4@sha256:442dcb09a67592752871f7b8da0eeccc3431f91263369bf10898893e4788ef92"
+    OUT: "$CI_PROJECT_DIR/artifacts/runtime"
+  allow_failure: false
+  interruptible: false
+  timeout: 45m
+  before_script:
+    - |
+      set -euo pipefail
+      cd /tmp
+      # k3d v5.7.4: SHA-256 from the official release checksums.txt.
+      curl -sSfL -o k3d "https://github.com/k3d-io/k3d/releases/download/v5.7.4/k3d-linux-amd64"
+      echo "1ac1da365236736a8df8c32107b54aca208384ab1d9a06771443c85ad698a5eb  k3d" | sha256sum -c -
+      # kubectl v1.31.1: SHA-256 from dl.k8s.io/.../kubectl.sha256.
+      curl -sSfL -o kubectl "https://dl.k8s.io/release/v1.31.1/bin/linux/amd64/kubectl"
+      echo "57b514a7facce4ee62c93b8dc21fda8cf62ef3fed22e44ffc9d167eab843b2ae  kubectl" | sha256sum -c -
+      # Docker CLI 27.5.1 static: no official checksum is published; this
+      # SHA-256 was recorded from download.docker.com on 2026-10-08 (TOFU).
+      curl -sSfL -o docker.tgz "https://download.docker.com/linux/static/stable/x86_64/docker-27.5.1.tgz"
+      echo "4f798b3ee1e0140eab5bf30b0edc4e84f4cdb53255a429dc3bbae9524845d640  docker.tgz" | sha256sum -c -
+      tar -xzf docker.tgz docker/docker
+      install -m 0755 k3d kubectl docker/docker /usr/local/bin/
+    - !reference [.clavure-trusted-bootstrap, script]
+  script:
+    - |
+      set -euo pipefail
+      if [ -n "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-}" ]; then
+        git -C "$CI_PROJECT_DIR" fetch --quiet --depth=500 origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        REF="origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+      else
+        REF="origin/$CI_DEFAULT_BRANCH"
+      fi
+      (cd /tmp/trusted && scripts/build-demo-image.sh)
+      cd "$CI_PROJECT_DIR"
+      /tmp/trusted-venv/bin/clavure mr-check --runtime --trusted-root /tmp/trusted \
+        --cluster-name "clavure-ci-$CI_JOB_ID" --target-ref "$REF" --out "$OUT"
+      /tmp/trusted-venv/bin/clavure gate --artifacts "$OUT"
+  after_script:
+    - k3d cluster delete "clavure-ci-$CI_JOB_ID" || true
+  artifacts:
+    when: always
+    expose_as: "Clavure runtime evidence"
+    paths: [artifacts/runtime/]
+
+# Staging deployment: manual, protected ref only, re-checks the gate result
+# produced by the trusted branch gate of THIS pipeline and commit.
+.clavure-trusted-deploy-staging:
+  extends: .clavure-trusted-image
+  allow_failure: false
+  interruptible: false
+  environment:
+    name: staging
+  resource_group: staging
+  script:
+    - |
+      set -euo pipefail
+      test "${CI_COMMIT_REF_PROTECTED:-false}" = "true" || { echo "Refusing: unprotected ref"; exit 1; }
+      test -n "${STAGING_KUBECONFIG:-}" || { echo "STAGING_KUBECONFIG is not configured"; exit 1; }
+      python3 - <<'PY'
+      import json, os, sys
+      g = json.load(open("artifacts/trusted/gate-passed.json"))
+      ok = g.get("pass") is True and g.get("commit") == os.environ["CI_COMMIT_SHA"] \
+          and g.get("pipeline") == os.environ["CI_PIPELINE_ID"]
+      print("security gate record:", g)
+      sys.exit(0 if ok else "Refusing: no passing security gate for this commit and pipeline")
+      PY
+      cd /tmp
+      curl -sSfL -o kubectl "https://dl.k8s.io/release/v1.31.1/bin/linux/amd64/kubectl"
+      echo "57b514a7facce4ee62c93b8dc21fda8cf62ef3fed22e44ffc9d167eab843b2ae  kubectl" | sha256sum -c -
+      install -m 0755 kubectl /usr/local/bin/kubectl
+      cd "$CI_PROJECT_DIR"
+      kubectl --kubeconfig "$STAGING_KUBECONFIG" apply -R -f demo/manifests/

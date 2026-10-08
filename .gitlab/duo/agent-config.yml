@@ -1,0 +1,27 @@
+# GitLab Duo Agent Platform: execution environment for flows run from the UI.
+# Read from the default branch only. Keys per the agent-config.yml reference.
+#
+# The flow needs only Python and git to run the Clavure CLI. It gets NO
+# Kubernetes credentials: runtime verification happens in CI (runtime:k3d),
+# never inside the agent's environment.
+image: python:3.12-slim
+
+setup_script:
+  - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+  - pip install --no-cache-dir --require-hashes -r requirements.lock -r requirements-build.lock
+  - pip install --no-cache-dir --no-deps --no-build-isolation .
+
+cache:
+  key:
+    files:
+      - requirements.lock
+      - requirements-build.lock
+    prefix: clavure
+  paths:
+    - .cache/pip
+
+network_policy:
+  include_recommended_allowed: true
+  allowed_domains:
+    - pypi.org
+    - files.pythonhosted.org

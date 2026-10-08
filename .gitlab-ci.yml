@@ -1,0 +1,9 @@
+# Development mode: the pipeline is defined in ci/trusted/pipeline.yml.
+#
+# In this mode the configuration is NOT enforced: a merge request can edit
+# this file and ci/trusted/. For enforcement, point the project's
+# "CI/CD configuration file" setting at a protected copy
+# (ci/trusted/pipeline.yml@<group>/clavure-ci) or use the pipeline execution
+# policy in ci/trusted/security-policy.yml (Ultimate). See ci/trusted/README.md.
+include:
+  - local: /ci/trusted/pipeline.yml

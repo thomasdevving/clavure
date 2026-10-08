@@ -1,0 +1,139 @@
+{
+  "artifact": "permission-diff",
+  "clavure_version": "0.1.0",
+  "generated_at": "2026-10-08T16:53:00+00:00",
+  "scenario": "ecommerce-demo",
+  "requirements_fingerprint": "sha256:f07bf089a507133fb5ee19b0fddf51b6ac9e8003bc737d99b3cf60aa687c0780",
+  "manifest_sources": [
+    "demo/manifests/base",
+    "demo/manifests/change-analytics"
+  ],
+  "inputs_digest": "sha256:3b5009b8b303e0dff7451b4c1da38209139d75de63641f8a499dac9e362be7b7",
+  "added_policies": [
+    "clavure-analytics/reporting-egress-data",
+    "clavure-data/allow-analytics-to-data-tier"
+  ],
+  "removed_policies": [],
+  "modified_policies": [],
+  "expansions": [
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "protocol": "TCP",
+      "before": "BLOCKED",
+      "after": "ALLOWED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-REPORTING-FINANCEDB"
+      ],
+      "introduced_by": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ]
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "protocol": "TCP",
+      "before": "BLOCKED",
+      "after": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-REPORTING-ORDERS"
+      ],
+      "introduced_by": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ]
+    }
+  ],
+  "reductions": [],
+  "all_changes": [
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "protocol": "TCP",
+      "before": "BLOCKED",
+      "after": "ALLOWED",
+      "classification": "FORBIDDEN",
+      "constraints": [
+        "FORBID-REPORTING-FINANCEDB"
+      ],
+      "introduced_by": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ]
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "protocol": "TCP",
+      "before": "BLOCKED",
+      "after": "ALLOWED",
+      "classification": "REQUIRED",
+      "constraints": [
+        "REQ-REPORTING-ORDERS"
+      ],
+      "introduced_by": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "PERMISSION_EXPANSION:clavure-analytics/reporting->clavure-data/finance-db:5432",
+      "category": "PERMISSION_EXPANSION",
+      "severity": "CRITICAL",
+      "title": "Change newly permits clavure-analytics/reporting -> clavure-data/finance-db:5432/TCP (forbidden connection)",
+      "provenance": "diff",
+      "constraint_id": "FORBID-REPORTING-FINANCEDB",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "ports": [
+        5432
+      ],
+      "verdict": "ALLOWED",
+      "evidence": [
+        "verdict changed BLOCKED -> ALLOWED",
+        "newly permitting rule: clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "newly permitting rule: clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "policies": [],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "scope_note": "Network reachability (L3/L4) only: this shows that a TCP connection is permitted by the NetworkPolicy model, not that the application authorizes the request or that the resource is exploitable."
+    },
+    {
+      "id": "PERMISSION_EXPANSION:clavure-analytics/reporting->clavure-data/orders-db:5432",
+      "category": "PERMISSION_EXPANSION",
+      "severity": "INFO",
+      "title": "Change newly permits clavure-analytics/reporting -> clavure-data/orders-db:5432/TCP (required connection)",
+      "provenance": "diff",
+      "constraint_id": "REQ-REPORTING-ORDERS",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "ports": [
+        5432
+      ],
+      "verdict": "ALLOWED",
+      "evidence": [
+        "verdict changed BLOCKED -> ALLOWED",
+        "newly permitting rule: clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "newly permitting rule: clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "policies": [],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "scope_note": "Network reachability (L3/L4) only: this shows that a TCP connection is permitted by the NetworkPolicy model, not that the application authorizes the request or that the resource is exploitable."
+    }
+  ]
+}

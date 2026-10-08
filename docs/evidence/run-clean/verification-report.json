@@ -1,0 +1,3718 @@
+{
+  "pipeline": "clavure closed-loop verification",
+  "started_at": "2026-10-08T16:50:12.428+00:00",
+  "scenario": "ecommerce-demo",
+  "requirements_fingerprint": "sha256:f07bf089a507133fb5ee19b0fddf51b6ac9e8003bc737d99b3cf60aa687c0780",
+  "baseline_sources": [
+    "demo/manifests/base"
+  ],
+  "proposed_sources": [
+    "demo/manifests/base",
+    "demo/manifests/change-analytics"
+  ],
+  "separation_of_concerns": {
+    "declared_requirements": "demo/scenario.yaml",
+    "modelled_reachability": "reachability.json",
+    "observed_runtime_behaviour": "verification-report.json#runtime",
+    "verified_violations": "verification-report.json#verified_violations",
+    "proposed_remediations": "remediation-plan.json"
+  },
+  "adversarial_extension": {
+    "status": "NOT_IMPLEMENTED",
+    "detail": "The adversarial agent extension is not part of this build; no adversarial results exist and none are reported."
+  },
+  "finished_at": "2026-10-08T16:52:48.907+00:00",
+  "final_verdict": "REMEDIATION_VERIFIED",
+  "stages": [
+    {
+      "stage": "analyze",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:50:12.512+00:00",
+      "detail": "1 constraint(s) not satisfied",
+      "consistency_issues": []
+    },
+    {
+      "stage": "permission-diff",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:50:12.575+00:00",
+      "detail": "2 newly permitted connection(s)"
+    },
+    {
+      "stage": "runtime-baseline",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:51:49.178+00:00",
+      "detail": "outcome=FAIL",
+      "enforcement_confirmed": true
+    },
+    {
+      "stage": "optimize#1",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:51:49.500+00:00",
+      "detail": "selected P-001: Narrow clavure-data/allow-analytics-to-data-tier podSelector to select only clavure-data/orders-db"
+    },
+    {
+      "stage": "render#1",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:51:49.529+00:00",
+      "detail": "1 file(s) changed",
+      "out_of_band": []
+    },
+    {
+      "stage": "model-verify#1",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:51:49.728+00:00",
+      "detail": "outcome=PASS"
+    },
+    {
+      "stage": "runtime-verify#1",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:52:46.504+00:00",
+      "detail": "outcome=PASS; mismatches=0"
+    },
+    {
+      "stage": "teardown",
+      "status": "EXECUTED",
+      "timestamp": "2026-10-08T16:52:48.906+00:00",
+      "detail": "disposable cluster deleted"
+    }
+  ],
+  "repair_attempts": [
+    {
+      "attempt": 1,
+      "selected": "P-001",
+      "summary": "Narrow clavure-data/allow-analytics-to-data-tier podSelector to select only clavure-data/orders-db",
+      "stats": {
+        "actions_generated": 9,
+        "max_actions_per_plan": 3,
+        "combinations_evaluated": 44,
+        "combinations_skipped_conflicting": 85,
+        "valid_plans": 5,
+        "invalid_plans": 39,
+        "budget_exhausted": false,
+        "search_seconds": 0.321
+      },
+      "model_verification": "PASS",
+      "runtime_outcome": "PASS",
+      "mismatches": 0,
+      "out_of_band_skipped": []
+    }
+  ],
+  "model_verification": {
+    "verifier": "clavure.verification.model_verifier (independent implementation)",
+    "outcome": "PASS",
+    "manifest_sources": [
+      "artifacts/remediated-manifests/00-base",
+      "artifacts/remediated-manifests/01-change-analytics"
+    ],
+    "structural_errors": [],
+    "checks": [
+      {
+        "constraint_id": "REQ-STOREFRONT-ORDERS",
+        "kind": "required",
+        "outcome": "PASS",
+        "expected": "ALLOW",
+        "observations": [
+          {
+            "source": "clavure-shop/storefront",
+            "destination": "clavure-shop/order-service",
+            "port": 8080,
+            "result": "ALLOW"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "REQ-ORDERS-ORDERSDB",
+        "kind": "required",
+        "outcome": "PASS",
+        "expected": "ALLOW",
+        "observations": [
+          {
+            "source": "clavure-shop/order-service",
+            "destination": "clavure-data/orders-db",
+            "port": 5432,
+            "result": "ALLOW"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "REQ-ORDERS-PAYMENT",
+        "kind": "required",
+        "outcome": "PASS",
+        "expected": "ALLOW",
+        "observations": [
+          {
+            "source": "clavure-shop/order-service",
+            "destination": "clavure-shop/payment-service",
+            "port": 8080,
+            "result": "ALLOW"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "REQ-PAYMENT-FINANCEDB",
+        "kind": "required",
+        "outcome": "PASS",
+        "expected": "ALLOW",
+        "observations": [
+          {
+            "source": "clavure-shop/payment-service",
+            "destination": "clavure-data/finance-db",
+            "port": 5432,
+            "result": "ALLOW"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "REQ-REPORTING-ORDERS",
+        "kind": "required",
+        "outcome": "PASS",
+        "expected": "ALLOW",
+        "observations": [
+          {
+            "source": "clavure-analytics/reporting",
+            "destination": "clavure-data/orders-db",
+            "port": 5432,
+            "result": "ALLOW"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "FORBID-REPORTING-FINANCEDB",
+        "kind": "forbidden",
+        "outcome": "PASS",
+        "expected": "DENY",
+        "observations": [
+          {
+            "source": "clavure-analytics/reporting",
+            "destination": "clavure-data/finance-db",
+            "port": 5432,
+            "result": "DENY"
+          },
+          {
+            "source": "clavure-analytics/reporting",
+            "destination": "clavure-data/finance-db",
+            "port": 9187,
+            "result": "DENY"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "FORBID-STOREFRONT-FINANCEDB",
+        "kind": "forbidden",
+        "outcome": "PASS",
+        "expected": "DENY",
+        "observations": [
+          {
+            "source": "clavure-shop/storefront",
+            "destination": "clavure-data/finance-db",
+            "port": 5432,
+            "result": "DENY"
+          },
+          {
+            "source": "clavure-shop/storefront",
+            "destination": "clavure-data/finance-db",
+            "port": 9187,
+            "result": "DENY"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "constraint_id": "FORBID-STOREFRONT-ORDERSDB",
+        "kind": "forbidden",
+        "outcome": "PASS",
+        "expected": "DENY",
+        "observations": [
+          {
+            "source": "clavure-shop/storefront",
+            "destination": "clavure-data/orders-db",
+            "port": 5432,
+            "result": "DENY"
+          },
+          {
+            "source": "clavure-shop/storefront",
+            "destination": "clavure-data/orders-db",
+            "port": 9187,
+            "result": "DENY"
+          }
+        ],
+        "detail": ""
+      }
+    ],
+    "baseline_compared": true,
+    "new_connectivity": [],
+    "cross_checked_against_engine": true,
+    "engine_disagreements": []
+  },
+  "runtime": [
+    {
+      "phase": "baseline (proposed change deployed)",
+      "timestamp": "2026-10-08T16:51:49.177+00:00",
+      "preflight": {
+        "timestamp": "2026-10-08T16:50:52.961+00:00",
+        "cluster_identity": {
+          "nodes": [
+            "k3d-clavure-test-server-0"
+          ],
+          "k3s_node_args": [
+            "server",
+            "--disable",
+            "traefik",
+            "--disable",
+            "metrics-server",
+            "--tls-san",
+            "0.0.0.0"
+          ]
+        },
+        "network_policy_controller": "k3s embedded (kube-router) network policy controller",
+        "controller_configured": true,
+        "canary": {
+          "namespace": "clavure-canary",
+          "server_ip": "10.42.0.10",
+          "baseline_connected": true,
+          "blocked_after_deny": true,
+          "restored_after_delete": true,
+          "blocked_status": "REFUSED",
+          "samples": {
+            "baseline": [
+              {
+                "target": "10.42.0.10",
+                "port": 5432,
+                "resolved": "10.42.0.10",
+                "status": "CONNECTED",
+                "response": "PONG orders-db",
+                "elapsed_ms": 27.6
+              }
+            ],
+            "deny": [
+              {
+                "target": "10.42.0.10",
+                "port": 5432,
+                "resolved": "10.42.0.10",
+                "status": "REFUSED",
+                "response": null,
+                "elapsed_ms": 17.7
+              }
+            ],
+            "restore": [
+              {
+                "target": "10.42.0.10",
+                "port": 5432,
+                "resolved": "10.42.0.10",
+                "status": "CONNECTED",
+                "response": "PONG orders-db",
+                "elapsed_ms": 24.5
+              }
+            ]
+          },
+          "confirmed": true
+        },
+        "enforcement_confirmed": true
+      },
+      "health": {
+        "storefront": {
+          "workload": "clavure-shop/storefront",
+          "ready": true,
+          "pod": "storefront-6b976f864b-d77tn",
+          "pod_ip": "10.42.0.4",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        },
+        "order-service": {
+          "workload": "clavure-shop/order-service",
+          "ready": true,
+          "pod": "order-service-664cf76868-jn9tz",
+          "pod_ip": "10.42.0.5",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        },
+        "payment-service": {
+          "workload": "clavure-shop/payment-service",
+          "ready": true,
+          "pod": "payment-service-87fbdb57b-wr5p6",
+          "pod_ip": "10.42.0.6",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        },
+        "orders-db": {
+          "workload": "clavure-data/orders-db",
+          "ready": true,
+          "pod": "orders-db-847849774-h9sr6",
+          "pod_ip": "10.42.0.7",
+          "listeners": {
+            "5432": true,
+            "9187": true
+          },
+          "endpoints": 1
+        },
+        "finance-db": {
+          "workload": "clavure-data/finance-db",
+          "ready": true,
+          "pod": "finance-db-66fbd88bf6-xtj89",
+          "pod_ip": "10.42.0.8",
+          "listeners": {
+            "5432": true,
+            "9187": true
+          },
+          "endpoints": 1
+        },
+        "reporting": {
+          "workload": "clavure-analytics/reporting",
+          "ready": true,
+          "pod": "reporting-664c4964c9-2wmfw",
+          "pod_ip": "10.42.0.9",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        }
+      },
+      "checks": [
+        {
+          "constraint_id": "REQ-STOREFRONT-ORDERS",
+          "kind": "required",
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-shop/order-service",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-e0f61dda7d58"
+          ],
+          "model_verdicts": {
+            "order-service:8080": "ALLOWED"
+          },
+          "detail": "service-dns order-service.clavure-shop.svc.cluster.local:80 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-ORDERS-ORDERSDB",
+          "kind": "required",
+          "source": "clavure-shop/order-service",
+          "destination": "clavure-data/orders-db",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-3381d2ac2700"
+          ],
+          "model_verdicts": {
+            "orders-db:5432": "ALLOWED"
+          },
+          "detail": "service-dns orders-db.clavure-data.svc.cluster.local:5432 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-ORDERS-PAYMENT",
+          "kind": "required",
+          "source": "clavure-shop/order-service",
+          "destination": "clavure-shop/payment-service",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-08431dc9595e"
+          ],
+          "model_verdicts": {
+            "payment-service:8080": "ALLOWED"
+          },
+          "detail": "service-dns payment-service.clavure-shop.svc.cluster.local:80 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-PAYMENT-FINANCEDB",
+          "kind": "required",
+          "source": "clavure-shop/payment-service",
+          "destination": "clavure-data/finance-db",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-af0eac8f9e7c"
+          ],
+          "model_verdicts": {
+            "finance-db:5432": "ALLOWED"
+          },
+          "detail": "service-dns finance-db.clavure-data.svc.cluster.local:5432 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-REPORTING-ORDERS",
+          "kind": "required",
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/orders-db",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-f1563319d78c"
+          ],
+          "model_verdicts": {
+            "orders-db:5432": "ALLOWED"
+          },
+          "detail": "service-dns orders-db.clavure-data.svc.cluster.local:5432 -> ALLOWED"
+        },
+        {
+          "constraint_id": "FORBID-REPORTING-FINANCEDB",
+          "kind": "forbidden",
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/finance-db",
+          "expected": "BLOCKED",
+          "observed": "ALLOWED",
+          "outcome": "FAIL",
+          "probe_ids": [
+            "obs-1ad91e68a0be",
+            "obs-47fb5c7010ac",
+            "obs-4934bae611f0",
+            "obs-fa6c4d2774e6"
+          ],
+          "model_verdicts": {
+            "finance-db:5432": "ALLOWED",
+            "finance-db:9187": "BLOCKED"
+          },
+          "detail": "pod-ip 10.42.0.8:5432 -> ALLOWED; pod-ip 10.42.0.8:9187 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:5432 -> ALLOWED; service-dns finance-db.clavure-data.svc.cluster.local:9187 -> BLOCKED"
+        },
+        {
+          "constraint_id": "FORBID-STOREFRONT-FINANCEDB",
+          "kind": "forbidden",
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/finance-db",
+          "expected": "BLOCKED",
+          "observed": "BLOCKED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-d2c9d8d81902",
+            "obs-cf58e9d067d0",
+            "obs-9abfe37f2b80",
+            "obs-042fa8001a18"
+          ],
+          "model_verdicts": {
+            "finance-db:5432": "BLOCKED",
+            "finance-db:9187": "BLOCKED"
+          },
+          "detail": "pod-ip 10.42.0.8:5432 -> BLOCKED; pod-ip 10.42.0.8:9187 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:5432 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:9187 -> BLOCKED"
+        },
+        {
+          "constraint_id": "FORBID-STOREFRONT-ORDERSDB",
+          "kind": "forbidden",
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/orders-db",
+          "expected": "BLOCKED",
+          "observed": "BLOCKED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-878e2fec67ea",
+            "obs-a863540df6bc",
+            "obs-ef15e93eae00",
+            "obs-f2623f74a103"
+          ],
+          "model_verdicts": {
+            "orders-db:5432": "BLOCKED",
+            "orders-db:9187": "BLOCKED"
+          },
+          "detail": "pod-ip 10.42.0.7:5432 -> BLOCKED; pod-ip 10.42.0.7:9187 -> BLOCKED; service-dns orders-db.clavure-data.svc.cluster.local:5432 -> BLOCKED; service-dns orders-db.clavure-data.svc.cluster.local:9187 -> BLOCKED"
+        }
+      ],
+      "workflows": [
+        {
+          "id": "WF-CHECKOUT",
+          "outcome": "PASS",
+          "timestamp": "2026-10-08T16:51:48.087+00:00",
+          "correlation_id": "wf-374bbc4952",
+          "http_status": 200,
+          "response": {
+            "ok": true,
+            "checkout": {
+              "ok": true,
+              "order": "OK 443c59d62e8c",
+              "payment": {
+                "ok": true,
+                "ledger": "OK 39e7d80763ee"
+              }
+            }
+          },
+          "state_checks": [
+            {
+              "workload": "clavure-data/orders-db",
+              "table": "orders",
+              "found": true,
+              "raw": "[{\"item\": \"synthetic-item\", \"amount\": 12.5, \"correlation_id\": \"wf-374bbc4952\", \"id\": \"443c59d62e8c\"}]"
+            },
+            {
+              "workload": "clavure-data/finance-db",
+              "table": "ledger",
+              "found": true,
+              "raw": "[{\"amount\": 12.5, \"correlation_id\": \"wf-374bbc4952\", \"status\": \"captured\", \"id\": \"39e7d80763ee\"}]"
+            }
+          ],
+          "detail": "HTTP 200 and every expected state change observed"
+        },
+        {
+          "id": "WF-REPORTING",
+          "outcome": "PASS",
+          "timestamp": "2026-10-08T16:51:49.177+00:00",
+          "correlation_id": "wf-d26e194f56",
+          "http_status": 200,
+          "response": {
+            "ok": true,
+            "orders": 3,
+            "revenue": 37.49
+          },
+          "state_checks": [],
+          "detail": "HTTP 200 and every expected state change observed"
+        }
+      ],
+      "mismatches": [],
+      "probes": [
+        {
+          "id": "obs-fdc89ddf5199",
+          "timestamp": "2026-10-08T16:51:07.677+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-shop/order-service",
+          "target_host": "order-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "order-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "order-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.136.55",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 31.6
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.136.55:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-92a97282d436",
+          "timestamp": "2026-10-08T16:51:08.868+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 20.9
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-caf289875068",
+          "timestamp": "2026-10-08T16:51:09.768+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-shop/payment-service",
+          "target_host": "payment-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "payment-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "payment-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.194.249",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 22.7
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.194.249:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-315015da2bc6",
+          "timestamp": "2026-10-08T16:51:10.875+00:00",
+          "actor": "clavure-shop/payment-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/payment-service-87fbdb57b-wr5p6",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 20.3
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.192.173:5432; application answered 'PONG finance-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-1ab6e501d97d",
+          "timestamp": "2026-10-08T16:51:12.108+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 20.2
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-0b44ee473a43",
+          "timestamp": "2026-10-08T16:51:13.097+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 20.8
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.42.0.8:5432; application answered 'PONG finance-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-ccc0b45b54fe",
+          "timestamp": "2026-10-08T16:51:14.071+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 20.8
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.192.173:5432; application answered 'PONG finance-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-fff41254c8ce",
+          "timestamp": "2026-10-08T16:51:15.049+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 16.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-7944a0cfd823",
+          "timestamp": "2026-10-08T16:51:16.006+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 26.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-60e592ac13f7",
+          "timestamp": "2026-10-08T16:51:16.976+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 15.7
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-ce1b38b44764",
+          "timestamp": "2026-10-08T16:51:17.927+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 19.7
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-41ccde68c60e",
+          "timestamp": "2026-10-08T16:51:18.889+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 28.2
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-2a009731d6de",
+          "timestamp": "2026-10-08T16:51:19.805+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-487f8c90e393",
+          "timestamp": "2026-10-08T16:51:20.735+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 5432,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 18.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-1817788c300c",
+          "timestamp": "2026-10-08T16:51:21.695+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.3
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-cbbc9738a5f5",
+          "timestamp": "2026-10-08T16:51:22.631+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 9187,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-235517adcbc5",
+          "timestamp": "2026-10-08T16:51:23.826+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 32.6
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-e0f61dda7d58",
+          "timestamp": "2026-10-08T16:51:27.067+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-shop/order-service",
+          "target_host": "order-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "order-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "order-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.136.55",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 28.3
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.136.55:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-shop/order-service-ingress"
+          ]
+        },
+        {
+          "id": "obs-3381d2ac2700",
+          "timestamp": "2026-10-08T16:51:28.344+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 28.5
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/order-service-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-08431dc9595e",
+          "timestamp": "2026-10-08T16:51:29.410+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-shop/payment-service",
+          "target_host": "payment-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "payment-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "payment-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.194.249",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 22.3
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.194.249:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/order-service-egress",
+            "clavure-shop/payment-service-ingress"
+          ]
+        },
+        {
+          "id": "obs-af0eac8f9e7c",
+          "timestamp": "2026-10-08T16:51:30.577+00:00",
+          "actor": "clavure-shop/payment-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/payment-service-87fbdb57b-wr5p6",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 22.2
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.192.173:5432; application answered 'PONG finance-db'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/payment-service-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-f1563319d78c",
+          "timestamp": "2026-10-08T16:51:31.716+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 30.8
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-1ad91e68a0be",
+          "timestamp": "2026-10-08T16:51:32.801+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 28.2
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.42.0.8:5432; application answered 'PONG finance-db'",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-47fb5c7010ac",
+          "timestamp": "2026-10-08T16:51:33.915+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 20.5
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.192.173:5432; application answered 'PONG finance-db'",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-4934bae611f0",
+          "timestamp": "2026-10-08T16:51:35.050+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 27.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-fa6c4d2774e6",
+          "timestamp": "2026-10-08T16:51:36.095+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 26.0
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-d2c9d8d81902",
+          "timestamp": "2026-10-08T16:51:37.231+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 23.3
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-cf58e9d067d0",
+          "timestamp": "2026-10-08T16:51:38.319+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-9abfe37f2b80",
+          "timestamp": "2026-10-08T16:51:39.368+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 17.2
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-042fa8001a18",
+          "timestamp": "2026-10-08T16:51:40.368+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.5
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-878e2fec67ea",
+          "timestamp": "2026-10-08T16:51:41.503+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 5432,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 17.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-a863540df6bc",
+          "timestamp": "2026-10-08T16:51:42.475+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 30.4
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-ef15e93eae00",
+          "timestamp": "2026-10-08T16:51:43.499+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 9187,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 28.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-f2623f74a103",
+          "timestamp": "2026-10-08T16:51:44.461+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.0
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        }
+      ],
+      "settle_rounds": 2,
+      "outcome": "FAIL"
+    },
+    {
+      "phase": "remediation attempt 1",
+      "timestamp": "2026-10-08T16:52:46.504+00:00",
+      "preflight": {
+        "timestamp": "2026-10-08T16:50:52.961+00:00",
+        "cluster_identity": {
+          "nodes": [
+            "k3d-clavure-test-server-0"
+          ],
+          "k3s_node_args": [
+            "server",
+            "--disable",
+            "traefik",
+            "--disable",
+            "metrics-server",
+            "--tls-san",
+            "0.0.0.0"
+          ]
+        },
+        "network_policy_controller": "k3s embedded (kube-router) network policy controller",
+        "controller_configured": true,
+        "canary": {
+          "namespace": "clavure-canary",
+          "server_ip": "10.42.0.10",
+          "baseline_connected": true,
+          "blocked_after_deny": true,
+          "restored_after_delete": true,
+          "blocked_status": "REFUSED",
+          "samples": {
+            "baseline": [
+              {
+                "target": "10.42.0.10",
+                "port": 5432,
+                "resolved": "10.42.0.10",
+                "status": "CONNECTED",
+                "response": "PONG orders-db",
+                "elapsed_ms": 27.6
+              }
+            ],
+            "deny": [
+              {
+                "target": "10.42.0.10",
+                "port": 5432,
+                "resolved": "10.42.0.10",
+                "status": "REFUSED",
+                "response": null,
+                "elapsed_ms": 17.7
+              }
+            ],
+            "restore": [
+              {
+                "target": "10.42.0.10",
+                "port": 5432,
+                "resolved": "10.42.0.10",
+                "status": "CONNECTED",
+                "response": "PONG orders-db",
+                "elapsed_ms": 24.5
+              }
+            ]
+          },
+          "confirmed": true
+        },
+        "enforcement_confirmed": true
+      },
+      "health": {
+        "storefront": {
+          "workload": "clavure-shop/storefront",
+          "ready": true,
+          "pod": "storefront-6b976f864b-d77tn",
+          "pod_ip": "10.42.0.4",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        },
+        "order-service": {
+          "workload": "clavure-shop/order-service",
+          "ready": true,
+          "pod": "order-service-664cf76868-jn9tz",
+          "pod_ip": "10.42.0.5",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        },
+        "payment-service": {
+          "workload": "clavure-shop/payment-service",
+          "ready": true,
+          "pod": "payment-service-87fbdb57b-wr5p6",
+          "pod_ip": "10.42.0.6",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        },
+        "orders-db": {
+          "workload": "clavure-data/orders-db",
+          "ready": true,
+          "pod": "orders-db-847849774-h9sr6",
+          "pod_ip": "10.42.0.7",
+          "listeners": {
+            "5432": true,
+            "9187": true
+          },
+          "endpoints": 1
+        },
+        "finance-db": {
+          "workload": "clavure-data/finance-db",
+          "ready": true,
+          "pod": "finance-db-66fbd88bf6-xtj89",
+          "pod_ip": "10.42.0.8",
+          "listeners": {
+            "5432": true,
+            "9187": true
+          },
+          "endpoints": 1
+        },
+        "reporting": {
+          "workload": "clavure-analytics/reporting",
+          "ready": true,
+          "pod": "reporting-664c4964c9-2wmfw",
+          "pod_ip": "10.42.0.9",
+          "listeners": {
+            "8080": true
+          },
+          "endpoints": 1
+        }
+      },
+      "checks": [
+        {
+          "constraint_id": "REQ-STOREFRONT-ORDERS",
+          "kind": "required",
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-shop/order-service",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-53160d2c788c"
+          ],
+          "model_verdicts": {
+            "order-service:8080": "ALLOWED"
+          },
+          "detail": "service-dns order-service.clavure-shop.svc.cluster.local:80 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-ORDERS-ORDERSDB",
+          "kind": "required",
+          "source": "clavure-shop/order-service",
+          "destination": "clavure-data/orders-db",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-85ac877b3c62"
+          ],
+          "model_verdicts": {
+            "orders-db:5432": "ALLOWED"
+          },
+          "detail": "service-dns orders-db.clavure-data.svc.cluster.local:5432 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-ORDERS-PAYMENT",
+          "kind": "required",
+          "source": "clavure-shop/order-service",
+          "destination": "clavure-shop/payment-service",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-b8912d7f764f"
+          ],
+          "model_verdicts": {
+            "payment-service:8080": "ALLOWED"
+          },
+          "detail": "service-dns payment-service.clavure-shop.svc.cluster.local:80 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-PAYMENT-FINANCEDB",
+          "kind": "required",
+          "source": "clavure-shop/payment-service",
+          "destination": "clavure-data/finance-db",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-1370cc8ad257"
+          ],
+          "model_verdicts": {
+            "finance-db:5432": "ALLOWED"
+          },
+          "detail": "service-dns finance-db.clavure-data.svc.cluster.local:5432 -> ALLOWED"
+        },
+        {
+          "constraint_id": "REQ-REPORTING-ORDERS",
+          "kind": "required",
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/orders-db",
+          "expected": "ALLOWED",
+          "observed": "ALLOWED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-f861ddf58051"
+          ],
+          "model_verdicts": {
+            "orders-db:5432": "ALLOWED"
+          },
+          "detail": "service-dns orders-db.clavure-data.svc.cluster.local:5432 -> ALLOWED"
+        },
+        {
+          "constraint_id": "FORBID-REPORTING-FINANCEDB",
+          "kind": "forbidden",
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/finance-db",
+          "expected": "BLOCKED",
+          "observed": "BLOCKED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-da1a4532b035",
+            "obs-e1651aef21d5",
+            "obs-565177437124",
+            "obs-faa83f3484fa"
+          ],
+          "model_verdicts": {
+            "finance-db:5432": "BLOCKED",
+            "finance-db:9187": "BLOCKED"
+          },
+          "detail": "pod-ip 10.42.0.8:5432 -> BLOCKED; pod-ip 10.42.0.8:9187 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:5432 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:9187 -> BLOCKED"
+        },
+        {
+          "constraint_id": "FORBID-STOREFRONT-FINANCEDB",
+          "kind": "forbidden",
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/finance-db",
+          "expected": "BLOCKED",
+          "observed": "BLOCKED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-c57c72c7242d",
+            "obs-92760fdfcf95",
+            "obs-b4a0c0386bae",
+            "obs-5e7b73f656fe"
+          ],
+          "model_verdicts": {
+            "finance-db:5432": "BLOCKED",
+            "finance-db:9187": "BLOCKED"
+          },
+          "detail": "pod-ip 10.42.0.8:5432 -> BLOCKED; pod-ip 10.42.0.8:9187 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:5432 -> BLOCKED; service-dns finance-db.clavure-data.svc.cluster.local:9187 -> BLOCKED"
+        },
+        {
+          "constraint_id": "FORBID-STOREFRONT-ORDERSDB",
+          "kind": "forbidden",
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/orders-db",
+          "expected": "BLOCKED",
+          "observed": "BLOCKED",
+          "outcome": "PASS",
+          "probe_ids": [
+            "obs-da3dd79c2cff",
+            "obs-d3b0769bd15b",
+            "obs-7fc657228a0a",
+            "obs-62638c13f3db"
+          ],
+          "model_verdicts": {
+            "orders-db:5432": "BLOCKED",
+            "orders-db:9187": "BLOCKED"
+          },
+          "detail": "pod-ip 10.42.0.7:5432 -> BLOCKED; pod-ip 10.42.0.7:9187 -> BLOCKED; service-dns orders-db.clavure-data.svc.cluster.local:5432 -> BLOCKED; service-dns orders-db.clavure-data.svc.cluster.local:9187 -> BLOCKED"
+        }
+      ],
+      "workflows": [
+        {
+          "id": "WF-CHECKOUT",
+          "outcome": "PASS",
+          "timestamp": "2026-10-08T16:52:45.395+00:00",
+          "correlation_id": "wf-724f1f5e03",
+          "http_status": 200,
+          "response": {
+            "ok": true,
+            "checkout": {
+              "ok": true,
+              "order": "OK aa755eb58bed",
+              "payment": {
+                "ok": true,
+                "ledger": "OK 8185ae6fd29e"
+              }
+            }
+          },
+          "state_checks": [
+            {
+              "workload": "clavure-data/orders-db",
+              "table": "orders",
+              "found": true,
+              "raw": "[{\"item\": \"synthetic-item\", \"amount\": 12.5, \"correlation_id\": \"wf-724f1f5e03\", \"id\": \"aa755eb58bed\"}]"
+            },
+            {
+              "workload": "clavure-data/finance-db",
+              "table": "ledger",
+              "found": true,
+              "raw": "[{\"amount\": 12.5, \"correlation_id\": \"wf-724f1f5e03\", \"status\": \"captured\", \"id\": \"8185ae6fd29e\"}]"
+            }
+          ],
+          "detail": "HTTP 200 and every expected state change observed"
+        },
+        {
+          "id": "WF-REPORTING",
+          "outcome": "PASS",
+          "timestamp": "2026-10-08T16:52:46.504+00:00",
+          "correlation_id": "wf-43e89ce138",
+          "http_status": 200,
+          "response": {
+            "ok": true,
+            "orders": 4,
+            "revenue": 49.99
+          },
+          "state_checks": [],
+          "detail": "HTTP 200 and every expected state change observed"
+        }
+      ],
+      "mismatches": [],
+      "probes": [
+        {
+          "id": "obs-5eea25bedfcf",
+          "timestamp": "2026-10-08T16:52:04.124+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-shop/order-service",
+          "target_host": "order-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "order-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "order-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.136.55",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 26.1
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.136.55:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-0ccc51f8da9c",
+          "timestamp": "2026-10-08T16:52:05.326+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 19.5
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-6c1dae05e0a0",
+          "timestamp": "2026-10-08T16:52:06.383+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-shop/payment-service",
+          "target_host": "payment-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "payment-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "payment-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.194.249",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 23.9
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.194.249:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-5557c37d73dc",
+          "timestamp": "2026-10-08T16:52:07.577+00:00",
+          "actor": "clavure-shop/payment-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/payment-service-87fbdb57b-wr5p6",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 23.3
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.192.173:5432; application answered 'PONG finance-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-f01a474d9231",
+          "timestamp": "2026-10-08T16:52:08.803+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 21.8
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-50e33a7cc697",
+          "timestamp": "2026-10-08T16:52:09.729+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 17.8
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-1ae4779b1aa1",
+          "timestamp": "2026-10-08T16:52:10.768+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-072bbe38f8d7",
+          "timestamp": "2026-10-08T16:52:11.846+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 19.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-ad9422f3947e",
+          "timestamp": "2026-10-08T16:52:12.885+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 23.2
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-c227cd7a0114",
+          "timestamp": "2026-10-08T16:52:13.860+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 18.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-1503e5b3c57d",
+          "timestamp": "2026-10-08T16:52:14.898+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 23.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-fb215e35a4cd",
+          "timestamp": "2026-10-08T16:52:15.929+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 18.7
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-90412c05381c",
+          "timestamp": "2026-10-08T16:52:17.064+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.0
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-2b0686351d47",
+          "timestamp": "2026-10-08T16:52:18.210+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 5432,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 18.3
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-61d536ad8017",
+          "timestamp": "2026-10-08T16:52:19.154+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-5a2e114b06a4",
+          "timestamp": "2026-10-08T16:52:20.116+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 9187,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 21.7
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-af0e4b5ad73b",
+          "timestamp": "2026-10-08T16:52:21.171+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 19.3
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": []
+        },
+        {
+          "id": "obs-53160d2c788c",
+          "timestamp": "2026-10-08T16:52:24.432+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-shop/order-service",
+          "target_host": "order-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "order-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "order-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.136.55",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 32.9
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.136.55:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-shop/order-service-ingress"
+          ]
+        },
+        {
+          "id": "obs-85ac877b3c62",
+          "timestamp": "2026-10-08T16:52:25.697+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 20.3
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/order-service-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-b8912d7f764f",
+          "timestamp": "2026-10-08T16:52:26.862+00:00",
+          "actor": "clavure-shop/order-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/order-service-664cf76868-jn9tz",
+          "target": "clavure-shop/payment-service",
+          "target_host": "payment-service.clavure-shop.svc.cluster.local",
+          "port": 80,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "payment-service.clavure-shop.svc.cluster.local",
+            "--port",
+            "80",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "payment-service.clavure-shop.svc.cluster.local",
+            "port": 80,
+            "resolved": "10.43.194.249",
+            "status": "CONNECTED",
+            "response": "<!DOCTYPE HTML>",
+            "elapsed_ms": 28.3
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.194.249:80; application answered '<!DOCTYPE HTML>'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/order-service-egress",
+            "clavure-shop/payment-service-ingress"
+          ]
+        },
+        {
+          "id": "obs-1370cc8ad257",
+          "timestamp": "2026-10-08T16:52:28.234+00:00",
+          "actor": "clavure-shop/payment-service",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/payment-service-87fbdb57b-wr5p6",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "CONNECTED",
+            "response": "PONG finance-db",
+            "elapsed_ms": 22.1
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.192.173:5432; application answered 'PONG finance-db'",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/payment-service-egress",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-f861ddf58051",
+          "timestamp": "2026-10-08T16:52:29.645+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "CONNECTED",
+            "response": "PONG orders-db",
+            "elapsed_ms": 25.5
+          },
+          "interpretation": "ALLOWED",
+          "reason": "TCP connection established to 10.43.89.74:5432; application answered 'PONG orders-db'",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-da1a4532b035",
+          "timestamp": "2026-10-08T16:52:30.563+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 16.6
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-e1651aef21d5",
+          "timestamp": "2026-10-08T16:52:31.543+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 17.9
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-565177437124",
+          "timestamp": "2026-10-08T16:52:32.493+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 18.0
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-faa83f3484fa",
+          "timestamp": "2026-10-08T16:52:33.477+00:00",
+          "actor": "clavure-analytics/reporting",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-analytics/reporting-664c4964c9-2wmfw",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.1
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-analytics/allow-dns-egress",
+            "clavure-analytics/default-deny-all",
+            "clavure-analytics/reporting-egress-data",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-c57c72c7242d",
+          "timestamp": "2026-10-08T16:52:34.523+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 5432,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 19.0
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-92760fdfcf95",
+          "timestamp": "2026-10-08T16:52:35.585+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 21.3
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-b4a0c0386bae",
+          "timestamp": "2026-10-08T16:52:36.669+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "10.42.0.8",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.8",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.8",
+            "port": 9187,
+            "resolved": "10.42.0.8",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 21.8
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-5e7b73f656fe",
+          "timestamp": "2026-10-08T16:52:37.845+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/finance-db",
+          "target_host": "finance-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "finance-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "finance-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.192.173",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 23.3
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/default-deny-all",
+            "clavure-data/finance-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-da3dd79c2cff",
+          "timestamp": "2026-10-08T16:52:38.891+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 5432,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 5432,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 19.5
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-d3b0769bd15b",
+          "timestamp": "2026-10-08T16:52:39.902+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 5432,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "5432",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 5432,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 20.4
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-7fc657228a0a",
+          "timestamp": "2026-10-08T16:52:40.946+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "10.42.0.7",
+          "port": 9187,
+          "via": "pod-ip",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "10.42.0.7",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "10.42.0.7",
+            "port": 9187,
+            "resolved": "10.42.0.7",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 18.2
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        },
+        {
+          "id": "obs-62638c13f3db",
+          "timestamp": "2026-10-08T16:52:42.012+00:00",
+          "actor": "clavure-shop/storefront",
+          "identity_kind": "workload-pod",
+          "executed_in": "clavure-shop/storefront-6b976f864b-d77tn",
+          "target": "clavure-data/orders-db",
+          "target_host": "orders-db.clavure-data.svc.cluster.local",
+          "port": 9187,
+          "via": "service-dns",
+          "command": [
+            "python",
+            "/app/app.py",
+            "probe",
+            "--host",
+            "orders-db.clavure-data.svc.cluster.local",
+            "--port",
+            "9187",
+            "--timeout",
+            "3.0",
+            "--send",
+            "PING"
+          ],
+          "exec_returncode": 0,
+          "raw": {
+            "target": "orders-db.clavure-data.svc.cluster.local",
+            "port": 9187,
+            "resolved": "10.43.89.74",
+            "status": "REFUSED",
+            "response": null,
+            "elapsed_ms": 27.5
+          },
+          "interpretation": "BLOCKED",
+          "reason": "REFUSED while the target listener is healthy and NetworkPolicy enforcement is confirmed by the canary test",
+          "relevant_policies": [
+            "clavure-shop/allow-dns-egress",
+            "clavure-shop/default-deny-all",
+            "clavure-shop/storefront-egress",
+            "clavure-data/allow-analytics-to-data-tier",
+            "clavure-data/default-deny-all",
+            "clavure-data/orders-db-ingress"
+          ]
+        }
+      ],
+      "settle_rounds": 2,
+      "outcome": "PASS"
+    }
+  ],
+  "verified_violations": [
+    {
+      "constraint_id": "FORBID-REPORTING-FINANCEDB",
+      "phase": "baseline (proposed change deployed)",
+      "observed": "ALLOWED",
+      "probe_ids": [
+        "obs-1ad91e68a0be",
+        "obs-47fb5c7010ac",
+        "obs-4934bae611f0",
+        "obs-fa6c4d2774e6"
+      ]
+    }
+  ],
+  "drift_findings": [],
+  "all_findings": [
+    {
+      "id": "FORBIDDEN_CONNECTIVITY:FORBID-REPORTING-FINANCEDB",
+      "category": "FORBIDDEN_CONNECTIVITY",
+      "severity": "CRITICAL",
+      "title": "Forbidden connectivity permitted: reporting -> finance-db (ports [5432])",
+      "provenance": "model",
+      "constraint_id": "FORBID-REPORTING-FINANCEDB",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "ports": [
+        5432
+      ],
+      "verdict": "ALLOWED",
+      "evidence": [
+        "allowed on port(s) [5432]",
+        "clavure-analytics/reporting -> clavure-data/finance-db:5432/TCP = ALLOWED",
+        "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; permitted by clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432.",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; permitted by clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432."
+      ],
+      "policies": [
+        "clavure-analytics/allow-dns-egress",
+        "clavure-analytics/default-deny-all",
+        "clavure-analytics/reporting-egress-data",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "scope_note": "Network reachability (L3/L4) only: this shows that a TCP connection is permitted by the NetworkPolicy model, not that the application authorizes the request or that the resource is exploitable."
+    },
+    {
+      "id": "PERMISSION_EXPANSION:clavure-analytics/reporting->clavure-data/finance-db:5432",
+      "category": "PERMISSION_EXPANSION",
+      "severity": "CRITICAL",
+      "title": "Change newly permits clavure-analytics/reporting -> clavure-data/finance-db:5432/TCP (forbidden connection)",
+      "provenance": "diff",
+      "constraint_id": "FORBID-REPORTING-FINANCEDB",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "ports": [
+        5432
+      ],
+      "verdict": "ALLOWED",
+      "evidence": [
+        "verdict changed BLOCKED -> ALLOWED",
+        "newly permitting rule: clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "newly permitting rule: clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "policies": [],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "scope_note": "Network reachability (L3/L4) only: this shows that a TCP connection is permitted by the NetworkPolicy model, not that the application authorizes the request or that the resource is exploitable."
+    },
+    {
+      "id": "PERMISSION_EXPANSION:clavure-analytics/reporting->clavure-data/orders-db:5432",
+      "category": "PERMISSION_EXPANSION",
+      "severity": "INFO",
+      "title": "Change newly permits clavure-analytics/reporting -> clavure-data/orders-db:5432/TCP (required connection)",
+      "provenance": "diff",
+      "constraint_id": "REQ-REPORTING-ORDERS",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "ports": [
+        5432
+      ],
+      "verdict": "ALLOWED",
+      "evidence": [
+        "verdict changed BLOCKED -> ALLOWED",
+        "newly permitting rule: clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "newly permitting rule: clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "policies": [],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "scope_note": "Network reachability (L3/L4) only: this shows that a TCP connection is permitted by the NetworkPolicy model, not that the application authorizes the request or that the resource is exploitable."
+    }
+  ],
+  "events": [
+    {
+      "timestamp": "2026-10-08T16:50:39.638+00:00",
+      "event": "deployed",
+      "manifests": [
+        "demo/manifests/base",
+        "demo/manifests/change-analytics"
+      ],
+      "objects": 30,
+      "policies": [
+        "clavure-analytics/allow-dns-egress",
+        "clavure-analytics/default-deny-all",
+        "clavure-analytics/reporting-egress-data",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress",
+        "clavure-data/orders-db-ingress",
+        "clavure-shop/allow-dns-egress",
+        "clavure-shop/default-deny-all",
+        "clavure-shop/order-service-egress",
+        "clavure-shop/order-service-ingress",
+        "clavure-shop/payment-service-egress",
+        "clavure-shop/payment-service-ingress",
+        "clavure-shop/storefront-egress",
+        "clavure-shop/storefront-ingress"
+      ]
+    },
+    {
+      "timestamp": "2026-10-08T16:50:52.961+00:00",
+      "event": "enforcement-canary",
+      "confirmed": true
+    },
+    {
+      "timestamp": "2026-10-08T16:51:49.961+00:00",
+      "event": "plan-applied",
+      "plan": "P-001",
+      "summary": "Narrow clavure-data/allow-analytics-to-data-tier podSelector to select only clavure-data/orders-db",
+      "skipped_out_of_band": []
+    }
+  ],
+  "success_criteria": {
+    "model_constraints_satisfied": true,
+    "runtime_connectivity_checks_pass": true,
+    "business_workflows_pass": true
+  }
+}
