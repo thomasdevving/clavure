@@ -30,6 +30,9 @@ def repo(tmp_path) -> Path:
     for item in (".clavure.yaml", "demo", "clavure", "requirements.lock", "pyproject.toml"):
         src = ROOT / item
         (shutil.copytree if src.is_dir() else shutil.copy2)(src, r / item)
+    # The baseline never contains the demo change, even when these tests run on
+    # the demonstration branch that adds it.
+    shutil.rmtree(r / "demo" / "manifests" / "analytics-access", ignore_errors=True)
     git(r, "init", "-q", "-b", "main")
     git(r, "config", "user.email", "t@example.com")
     git(r, "config", "user.name", "t")
@@ -144,7 +147,7 @@ def test_apply_remediation_rolls_back_on_failed_verification(tmp_path, monkeypat
     work = tmp_path / "w"
     shutil.copytree(ROOT / "demo", work / "demo")
     shutil.copy2(ROOT / ".clavure.yaml", work / ".clavure.yaml")
-    shutil.copytree(CHANGE, work / "demo" / "manifests" / "analytics-access")
+    shutil.copytree(CHANGE, work / "demo" / "manifests" / "analytics-access", dirs_exist_ok=True)
     monkeypatch.chdir(work)
     a = analyze([Path("demo/manifests")], scenario)
     r = optimize(a)

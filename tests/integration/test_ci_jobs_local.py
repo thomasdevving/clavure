@@ -70,7 +70,10 @@ def world(tmp_path_factory):
     src = base / "src"
     src.mkdir()
     for f in git(ROOT, "ls-files").splitlines():
-        if f.startswith("docs/evidence/") or not (ROOT / f).exists():
+        if (
+            f.startswith(("docs/evidence/", "demo/manifests/analytics-access/"))
+            or not (ROOT / f).exists()
+        ):
             continue
         dest = src / f
         dest.parent.mkdir(parents=True, exist_ok=True)
