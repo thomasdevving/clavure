@@ -7,5 +7,5 @@ __pycache__/
 build/
 dist/
 # Generated evidence (CI publishes these as artifacts)
-artifacts/
+artifacts*/
 .clavure/

@@ -1,0 +1,56 @@
+{
+  "artifact": "security-findings",
+  "clavure_version": "0.1.0",
+  "generated_at": "2026-10-08T16:50:12+00:00",
+  "scenario": "ecommerce-demo",
+  "requirements_fingerprint": "sha256:f07bf089a507133fb5ee19b0fddf51b6ac9e8003bc737d99b3cf60aa687c0780",
+  "manifest_sources": [
+    "demo/manifests/base",
+    "demo/manifests/change-analytics"
+  ],
+  "inputs_digest": "sha256:3b5009b8b303e0dff7451b4c1da38209139d75de63641f8a499dac9e362be7b7",
+  "summary": {
+    "total": 1,
+    "by_severity": {
+      "CRITICAL": 1
+    },
+    "constraints_violated": 1,
+    "constraints_undecided": 0,
+    "constraints_satisfied": 7
+  },
+  "findings": [
+    {
+      "id": "FORBIDDEN_CONNECTIVITY:FORBID-REPORTING-FINANCEDB",
+      "category": "FORBIDDEN_CONNECTIVITY",
+      "severity": "CRITICAL",
+      "title": "Forbidden connectivity permitted: reporting -> finance-db (ports [5432])",
+      "provenance": "model",
+      "constraint_id": "FORBID-REPORTING-FINANCEDB",
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "ports": [
+        5432
+      ],
+      "verdict": "ALLOWED",
+      "evidence": [
+        "allowed on port(s) [5432]",
+        "clavure-analytics/reporting -> clavure-data/finance-db:5432/TCP = ALLOWED",
+        "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; permitted by clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432.",
+        "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; permitted by clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432."
+      ],
+      "policies": [
+        "clavure-analytics/allow-dns-egress",
+        "clavure-analytics/default-deny-all",
+        "clavure-analytics/reporting-egress-data",
+        "clavure-data/allow-analytics-to-data-tier",
+        "clavure-data/default-deny-all",
+        "clavure-data/finance-db-ingress"
+      ],
+      "permitting_rules": [
+        "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432",
+        "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+      ],
+      "scope_note": "Network reachability (L3/L4) only: this shows that a TCP connection is permitted by the NetworkPolicy model, not that the application authorizes the request or that the resource is exploitable."
+    }
+  ]
+}

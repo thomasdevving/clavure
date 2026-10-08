@@ -1,0 +1,201 @@
+# Shop tier: customer-facing storefront, order orchestration, payments.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storefront
+  namespace: clavure-shop
+  labels:
+    app: storefront
+  annotations:
+    clavure.io/criticality: high
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storefront
+  template:
+    metadata:
+      labels:
+        app: storefront
+        tier: web
+        team: commerce
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: clavure-demo:0.1.0
+          imagePullPolicy: Never
+          args: ["serve"]
+          env:
+            - name: CLAVURE_ROLE
+              value: storefront
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storefront
+  namespace: clavure-shop
+spec:
+  selector:
+    app: storefront
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: clavure-shop
+  labels:
+    app: order-service
+  annotations:
+    clavure.io/criticality: high
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        tier: backend
+        team: commerce
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: clavure-demo:0.1.0
+          imagePullPolicy: Never
+          args: ["serve"]
+          env:
+            - name: CLAVURE_ROLE
+              value: order-service
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: clavure-shop
+spec:
+  selector:
+    app: order-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: clavure-shop
+  labels:
+    app: payment-service
+  annotations:
+    clavure.io/criticality: high
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+        tier: backend
+        team: payments
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: clavure-demo:0.1.0
+          imagePullPolicy: Never
+          args: ["serve"]
+          env:
+            - name: CLAVURE_ROLE
+              value: payment-service
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: clavure-shop
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

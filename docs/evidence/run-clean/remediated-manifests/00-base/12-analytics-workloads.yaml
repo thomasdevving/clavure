@@ -1,0 +1,68 @@
+# Analytics tier: reporting service (reads order data for dashboards).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reporting
+  namespace: clavure-analytics
+  labels:
+    app: reporting
+  annotations:
+    clavure.io/criticality: medium
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reporting
+  template:
+    metadata:
+      labels:
+        app: reporting
+        tier: backend
+        team: analytics
+        role: analytics
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: clavure-demo:0.1.0
+          imagePullPolicy: Never
+          args: ["serve"]
+          env:
+            - name: CLAVURE_ROLE
+              value: reporting
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reporting
+  namespace: clavure-analytics
+spec:
+  selector:
+    app: reporting
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

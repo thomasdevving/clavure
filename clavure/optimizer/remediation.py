@@ -47,6 +47,16 @@ class _K8sDumper(yaml.SafeDumper):
         return super().increase_indent(flow, False)
 
 
+def _represent_list(dumper: yaml.SafeDumper, data: list):
+    # Short lists of scalars (policyTypes, label values) stay on one line, as
+    # hand-written manifests usually have them; everything else is block style.
+    flow = 0 < len(data) <= 4 and all(isinstance(x, str | int) for x in data)
+    return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=flow)
+
+
+_K8sDumper.add_representer(list, _represent_list)
+
+
 def _dump(doc: dict) -> str:
     return yaml.dump(doc, Dumper=_K8sDumper, sort_keys=False, default_flow_style=False)
 
@@ -135,6 +145,8 @@ def render_plan(
     def target_for(src_path: str) -> Path:
         p = Path(src_path).resolve()
         for orig, dest in mapping.items():
+            if orig.is_dir() and p == orig:
+                return dest
             if orig.is_dir() and orig in p.parents:
                 return dest / p.relative_to(orig)
             if p == orig:

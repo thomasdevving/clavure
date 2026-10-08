@@ -1,0 +1,1555 @@
+{
+  "artifact": "reachability",
+  "clavure_version": "0.1.0",
+  "generated_at": "2026-10-08T16:53:00+00:00",
+  "scenario": "ecommerce-demo",
+  "requirements_fingerprint": "sha256:f07bf089a507133fb5ee19b0fddf51b6ac9e8003bc737d99b3cf60aa687c0780",
+  "manifest_sources": [
+    "demo/manifests/base",
+    "demo/manifests/change-analytics"
+  ],
+  "inputs_digest": "sha256:3b5009b8b303e0dff7451b4c1da38209139d75de63641f8a499dac9e362be7b7",
+  "semantics": "Kubernetes networking.k8s.io/v1 NetworkPolicy, TCP, pod-to-pod after Service DNAT",
+  "summary": {
+    "connections_evaluated": 40,
+    "by_verdict": {
+      "ALLOWED": 6,
+      "BLOCKED": 34
+    }
+  },
+  "connections": [
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [
+          "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; permitted by clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; permitted by clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [
+          "clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; permitted by clavure-analytics/reporting-egress-data egress[0] peers[0] on TCP/5432."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; permitted by clavure-data/allow-analytics-to-data-tier ingress[0] peers[0] on TCP/5432."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-data/orders-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-shop/order-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/order-service: isolated by [clavure-shop/default-deny-all, clavure-shop/order-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-shop/payment-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/payment-service: isolated by [clavure-shop/default-deny-all, clavure-shop/payment-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-analytics/reporting",
+      "destination": "clavure-shop/storefront",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/allow-dns-egress",
+          "clavure-analytics/default-deny-all",
+          "clavure-analytics/reporting-egress-data"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-analytics/reporting: isolated by [clavure-analytics/allow-dns-egress, clavure-analytics/default-deny-all, clavure-analytics/reporting-egress-data]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/storefront: isolated by [clavure-shop/default-deny-all, clavure-shop/storefront-ingress]; permitted by clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/finance-db",
+      "destination": "clavure-analytics/reporting",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/finance-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-analytics/reporting: isolated by [clavure-analytics/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/finance-db",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/finance-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/finance-db",
+      "destination": "clavure-data/orders-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/finance-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/finance-db",
+      "destination": "clavure-shop/order-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/finance-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/order-service: isolated by [clavure-shop/default-deny-all, clavure-shop/order-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/finance-db",
+      "destination": "clavure-shop/payment-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/finance-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/payment-service: isolated by [clavure-shop/default-deny-all, clavure-shop/payment-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/finance-db",
+      "destination": "clavure-shop/storefront",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/finance-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/storefront: isolated by [clavure-shop/default-deny-all, clavure-shop/storefront-ingress]; permitted by clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/orders-db",
+      "destination": "clavure-analytics/reporting",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/orders-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-analytics/reporting: isolated by [clavure-analytics/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/orders-db",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/orders-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/orders-db",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/orders-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/orders-db",
+      "destination": "clavure-shop/order-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/orders-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/order-service: isolated by [clavure-shop/default-deny-all, clavure-shop/order-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/orders-db",
+      "destination": "clavure-shop/payment-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/orders-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/payment-service: isolated by [clavure-shop/default-deny-all, clavure-shop/payment-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-data/orders-db",
+      "destination": "clavure-shop/storefront",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-data/orders-db: isolated by [clavure-data/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/storefront: isolated by [clavure-shop/default-deny-all, clavure-shop/storefront-ingress]; permitted by clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-analytics/reporting",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-analytics/reporting: isolated by [clavure-analytics/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/order-service-egress egress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; permitted by clavure-shop/order-service-egress egress[0] peers[0] on TCP/5432."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-data/orders-db-ingress ingress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; permitted by clavure-data/orders-db-ingress ingress[0] peers[0] on TCP/5432."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-data/orders-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-shop/payment-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/order-service-egress egress[1] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; permitted by clavure-shop/order-service-egress egress[1] peers[0] on TCP/8080."
+      },
+      "ingress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/payment-service-ingress ingress[0] peers[0] on TCP/http"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/payment-service: isolated by [clavure-shop/default-deny-all, clavure-shop/payment-service-ingress]; permitted by clavure-shop/payment-service-ingress ingress[0] peers[0] on TCP/http."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/order-service",
+      "destination": "clavure-shop/storefront",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/order-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/order-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/storefront: isolated by [clavure-shop/default-deny-all, clavure-shop/storefront-ingress]; permitted by clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-analytics/reporting",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-analytics/reporting: isolated by [clavure-analytics/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/payment-service-egress egress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; permitted by clavure-shop/payment-service-egress egress[0] peers[0] on TCP/5432."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-data/finance-db-ingress ingress[0] peers[0] on TCP/5432"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; permitted by clavure-data/finance-db-ingress ingress[0] peers[0] on TCP/5432."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-data/orders-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-shop/order-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/order-service: isolated by [clavure-shop/default-deny-all, clavure-shop/order-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/payment-service",
+      "destination": "clavure-shop/storefront",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/payment-service: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/payment-service-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/storefront: isolated by [clavure-shop/default-deny-all, clavure-shop/storefront-ingress]; permitted by clavure-shop/storefront-ingress ingress[0] peers[0] on TCP/8080."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-analytics/reporting",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-analytics/reporting",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-analytics/default-deny-all"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-analytics/reporting: isolated by [clavure-analytics/default-deny-all]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/finance-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/finance-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/finance-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/finance-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/finance-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/finance-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/orders-db",
+      "port": 5432,
+      "port_name": "db",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-data/orders-db",
+      "port": 9187,
+      "port_name": "metrics",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-data/orders-db",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-data/allow-analytics-to-data-tier",
+          "clavure-data/default-deny-all",
+          "clavure-data/orders-db-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-data/orders-db: isolated by [clavure-data/allow-analytics-to-data-tier, clavure-data/default-deny-all, clavure-data/orders-db-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-shop/order-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "ALLOWED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/storefront-egress egress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; permitted by clavure-shop/storefront-egress egress[0] peers[0] on TCP/8080."
+      },
+      "ingress": {
+        "workload": "clavure-shop/order-service",
+        "isolated": true,
+        "verdict": "ALLOWED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/order-service-ingress"
+        ],
+        "permitting_rules": [
+          "clavure-shop/order-service-ingress ingress[0] peers[0] on TCP/8080"
+        ],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/order-service: isolated by [clavure-shop/default-deny-all, clavure-shop/order-service-ingress]; permitted by clavure-shop/order-service-ingress ingress[0] peers[0] on TCP/8080."
+      },
+      "unsupported": []
+    },
+    {
+      "source": "clavure-shop/storefront",
+      "destination": "clavure-shop/payment-service",
+      "port": 8080,
+      "port_name": "http",
+      "protocol": "TCP",
+      "verdict": "BLOCKED",
+      "egress": {
+        "workload": "clavure-shop/storefront",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/allow-dns-egress",
+          "clavure-shop/default-deny-all",
+          "clavure-shop/storefront-egress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Egress from clavure-shop/storefront: isolated by [clavure-shop/allow-dns-egress, clavure-shop/default-deny-all, clavure-shop/storefront-egress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "ingress": {
+        "workload": "clavure-shop/payment-service",
+        "isolated": true,
+        "verdict": "BLOCKED",
+        "selecting_policies": [
+          "clavure-shop/default-deny-all",
+          "clavure-shop/payment-service-ingress"
+        ],
+        "permitting_rules": [],
+        "uncertain_rules": [],
+        "explanation": "Ingress to clavure-shop/payment-service: isolated by [clavure-shop/default-deny-all, clavure-shop/payment-service-ingress]; no rule of any selecting policy matches (policies are allow-lists)."
+      },
+      "unsupported": []
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_id": "REQ-STOREFRONT-ORDERS",
+      "kind": "required",
+      "source": "storefront",
+      "destination": "order-service",
+      "status": "SATISFIED",
+      "detail": "all backends reachable",
+      "connections": [
+        {
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-shop/order-service",
+          "port": 8080,
+          "verdict": "ALLOWED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "REQ-ORDERS-ORDERSDB",
+      "kind": "required",
+      "source": "order-service",
+      "destination": "orders-db",
+      "status": "SATISFIED",
+      "detail": "all backends reachable",
+      "connections": [
+        {
+          "source": "clavure-shop/order-service",
+          "destination": "clavure-data/orders-db",
+          "port": 5432,
+          "verdict": "ALLOWED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "REQ-ORDERS-PAYMENT",
+      "kind": "required",
+      "source": "order-service",
+      "destination": "payment-service",
+      "status": "SATISFIED",
+      "detail": "all backends reachable",
+      "connections": [
+        {
+          "source": "clavure-shop/order-service",
+          "destination": "clavure-shop/payment-service",
+          "port": 8080,
+          "verdict": "ALLOWED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "REQ-PAYMENT-FINANCEDB",
+      "kind": "required",
+      "source": "payment-service",
+      "destination": "finance-db",
+      "status": "SATISFIED",
+      "detail": "all backends reachable",
+      "connections": [
+        {
+          "source": "clavure-shop/payment-service",
+          "destination": "clavure-data/finance-db",
+          "port": 5432,
+          "verdict": "ALLOWED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "REQ-REPORTING-ORDERS",
+      "kind": "required",
+      "source": "reporting",
+      "destination": "orders-db",
+      "status": "SATISFIED",
+      "detail": "all backends reachable",
+      "connections": [
+        {
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/orders-db",
+          "port": 5432,
+          "verdict": "ALLOWED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "FORBID-REPORTING-FINANCEDB",
+      "kind": "forbidden",
+      "source": "reporting",
+      "destination": "finance-db",
+      "status": "VIOLATED",
+      "detail": "allowed on port(s) [5432]",
+      "connections": [
+        {
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/finance-db",
+          "port": 5432,
+          "verdict": "ALLOWED"
+        },
+        {
+          "source": "clavure-analytics/reporting",
+          "destination": "clavure-data/finance-db",
+          "port": 9187,
+          "verdict": "BLOCKED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "FORBID-STOREFRONT-FINANCEDB",
+      "kind": "forbidden",
+      "source": "storefront",
+      "destination": "finance-db",
+      "status": "SATISFIED",
+      "detail": "blocked on every port",
+      "connections": [
+        {
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/finance-db",
+          "port": 5432,
+          "verdict": "BLOCKED"
+        },
+        {
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/finance-db",
+          "port": 9187,
+          "verdict": "BLOCKED"
+        }
+      ]
+    },
+    {
+      "constraint_id": "FORBID-STOREFRONT-ORDERSDB",
+      "kind": "forbidden",
+      "source": "storefront",
+      "destination": "orders-db",
+      "status": "SATISFIED",
+      "detail": "blocked on every port",
+      "connections": [
+        {
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/orders-db",
+          "port": 5432,
+          "verdict": "BLOCKED"
+        },
+        {
+          "source": "clavure-shop/storefront",
+          "destination": "clavure-data/orders-db",
+          "port": 9187,
+          "verdict": "BLOCKED"
+        }
+      ]
+    }
+  ]
+}
