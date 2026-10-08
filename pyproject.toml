@@ -30,6 +30,7 @@ include = ["clavure*"]
 
 [tool.setuptools.package-data]
 "clavure.reporting" = ["templates/*.html"]
+"clavure.runtime" = ["k3s/*.tmpl"]
 
 [tool.ruff]
 line-length = 100
@@ -47,7 +48,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "B011"]
-"demo/services/**" = ["S104"]  # demo services bind 0.0.0.0 inside their pods
+"demo/services/**" = ["S104", "S310"]  # binds 0.0.0.0 in pods; urlopen only on fixed in-cluster http URLs
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

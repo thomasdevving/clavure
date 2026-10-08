@@ -532,3 +532,8 @@ def conflicts(a: Action, b: Action) -> bool:
             if x[:n] == y[:n]:
                 return True
     return False
+
+
+def action_from_record(record: dict) -> Action:
+    """Rebuild an action from its serialized record (see :meth:`Action.record`)."""
+    return ACTION_TYPES[record["kind"]].model_validate(record["params"])
