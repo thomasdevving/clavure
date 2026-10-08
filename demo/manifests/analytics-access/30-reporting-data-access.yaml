@@ -1,0 +1,51 @@
+# Give the reporting service read access to order data.
+#
+# DEMONSTRATION MERGE REQUEST for Clavure. This change implements the declared
+# requirement REQ-REPORTING-ORDERS (reporting -> orders-db:5432) but contains a
+# DELIBERATE, DOCUMENTED MISCONFIGURATION:
+#
+#   1. The ingress policy selects the whole data tier (`tier: data`), which
+#      matches BOTH orders-db AND finance-db, instead of `app: orders-db`.
+#   2. The egress policy lets reporting reach *any* pod in the data zone.
+#
+# Because NetworkPolicies are additive, these rules open
+# reporting -> finance-db:5432 (forbidden by FORBID-REPORTING-FINANCEDB).
+# Clavure must detect this from the policy semantics, block the merge request,
+# and propose the least disruptive fix.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-analytics-to-data-tier
+  namespace: clavure-data
+spec:
+  podSelector:
+    matchLabels:
+      tier: data
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              zone: analytics
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: reporting-egress-data
+  namespace: clavure-analytics
+spec:
+  podSelector:
+    matchLabels:
+      app: reporting
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              zone: data
+      ports:
+        - protocol: TCP
+          port: 5432
