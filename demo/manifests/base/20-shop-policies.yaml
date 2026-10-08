@@ -1,0 +1,163 @@
+# Shop namespace NetworkPolicies (baseline, least-privilege).
+#
+# Pattern: default-deny for both directions, explicit DNS egress, then one
+# ingress and one egress policy per workload for each declared connection.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: clavure-shop
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: clavure-shop
+spec:
+  podSelector: {}
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# The storefront is the public entry point: any pod in any namespace may
+# open its HTTP port (in production an ingress controller would sit here).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: storefront-ingress
+  namespace: clavure-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: storefront
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: storefront-egress
+  namespace: clavure-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: storefront
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: order-service
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: order-service-ingress
+  namespace: clavure-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: order-service
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: storefront
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: order-service-egress
+  namespace: clavure-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: order-service
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: clavure-data
+          podSelector:
+            matchLabels:
+              app: orders-db
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: payment-service
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# Uses a *named* port ("http"): NetworkPolicy resolves it against the
+# destination pod's container ports, not against the Service port (80).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-service-ingress
+  namespace: clavure-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: payment-service
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: order-service
+      ports:
+        - protocol: TCP
+          port: http
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-service-egress
+  namespace: clavure-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: payment-service
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: clavure-data
+          podSelector:
+            matchLabels:
+              app: finance-db
+      ports:
+        - protocol: TCP
+          port: 5432

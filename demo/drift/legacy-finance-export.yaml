@@ -1,0 +1,32 @@
+# FAULT INJECTION FIXTURE — cluster drift (NOT part of the desired state).
+#
+# This policy is never stored with the application manifests. The runtime demo
+# applies it directly to the disposable test cluster only when run with
+# `--inject-drift`, simulating a "hotfix" someone once applied by hand for a
+# legacy quarterly export job.
+#
+# Purpose: exercise Clavure's feedback loop (docs/adversarial-verification.md).
+# The model built from git manifests cannot see this object, so a remediation
+# that is correct for the git model can still fail at runtime. Clavure must
+# detect the MODEL MISMATCH, re-ingest the live policies (read-only), and
+# re-optimize instead of claiming success.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legacy-finance-export
+  namespace: clavure-data
+  labels:
+    clavure.io/fault-injection: drift
+spec:
+  podSelector:
+    matchLabels:
+      app: finance-db
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              zone: analytics
+      ports:
+        - protocol: TCP
+          port: 5432

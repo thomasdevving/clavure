@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clavure"
+version = "0.1.0"
+description = "Autonomous security verification and least-disruptive remediation for Kubernetes NetworkPolicies"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Clavure contributors" }]
+dependencies = [
+    "pydantic>=2.7,<3",
+    "pyyaml>=6.0",
+    "networkx>=3.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+clavure = "clavure.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["clavure*"]
+
+[tool.setuptools.package-data]
+"clavure.reporting" = ["templates/*.html"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = [
+    "S101",   # assert is fine in tests
+    "S603",   # subprocess without shell is the intended, audited usage
+    "S607",   # kubectl/docker/k3d are resolved from PATH deliberately
+    "RUF012", # pydantic class attributes
+    "E501",   # line length is owned by `ruff format`
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B011"]
+"demo/services/**" = ["S104"]  # demo services bind 0.0.0.0 inside their pods
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "runtime: requires a disposable k3d cluster (CLAVURE_RUNTIME_TESTS=1)",
+]
+addopts = "-ra"
