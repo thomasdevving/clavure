@@ -88,19 +88,57 @@ def cmd_optimize(args) -> int:
 
 
 def cmd_apply(args) -> int:
-    """Apply the selected plan from a remediation-plan.json to the manifests in place."""
+    """Apply the selected plan in place; with --verify, roll back unless it verifies."""
+    import shutil
+    import tempfile
+
     from clavure.optimizer.remediation import render_plan
     from clavure.optimizer.solver import CandidatePlan
+    from clavure.verification.guard import load_config
+    from clavure.verification.model_verifier import cross_check, verify
 
+    cfg = load_config(args.config) if Path(args.config).exists() else {}
+    manifests = _paths(args.manifests or cfg.get("manifests", []))
+    scenario_path = Path(args.scenario or cfg.get("scenario", ""))
     doc = json.loads(Path(args.plan).read_text())
     if not doc.get("selected"):
         print("Plan has no selected remediation; nothing to apply.", file=sys.stderr)
+        print("CLAVURE_RESULT=FAILED")
         return 2
     plan = CandidatePlan.model_validate(doc["selected"])
-    res = render_plan(plan, _paths(args.manifests))
-    print(res.diff or "(no file changes)")
-    for oob in res.out_of_band:
-        print(f"OUT-OF-BAND (manual, not applied): {oob}")
+    with tempfile.TemporaryDirectory(prefix="clavure-before-") as tmp:
+        snapshot = []
+        for i, m in enumerate(manifests):
+            dest = Path(tmp) / f"{i:02d}-{m.name}"
+            if m.is_dir():
+                shutil.copytree(m, dest)
+            else:
+                dest.mkdir()
+                shutil.copy2(m, dest / m.name)
+            snapshot.append(dest)
+        res = render_plan(plan, manifests)
+        print(res.diff or "(no file changes)")
+        for oob in res.out_of_band:
+            print(f"OUT-OF-BAND (manual, not applied): {oob}")
+        if not args.verify:
+            return 0
+        rep = verify(manifests, scenario_path, baseline_paths=snapshot)
+        a = analyze(manifests, load_scenario(scenario_path))
+        cross_check(rep, {(c.source, c.destination, c.port): str(c.verdict) for c in a.matrix})
+        for c in rep.checks:
+            print(f"  {c.outcome:13} {c.constraint_id}")
+        if rep.outcome != "PASS" or res.out_of_band:
+            for m, snap in zip(manifests, snapshot, strict=True):
+                if m.is_dir():
+                    shutil.rmtree(m)
+                    shutil.copytree(snap, m)
+                else:
+                    shutil.copy2(snap / m.name, m)
+            print(f"Independent verification {rep.outcome}; changes rolled back.")
+            print("CLAVURE_RESULT=FAILED")
+            return 1
+    print("Independent model verification PASS (no new connectivity vs. the pre-change files).")
+    print("CLAVURE_RESULT=IMPLEMENTED")
     return 0
 
 
@@ -130,9 +168,35 @@ def cmd_verify_model(args) -> int:
 def cmd_guard(args) -> int:
     from clavure.verification.guard import check_trusted_files
 
-    result = check_trusted_files(args.base_ref, args.manifest, repo=args.repo)
+    result = check_trusted_files(args.base_ref, args.config, repo=args.repo)
     print(json.dumps(result, indent=2))
     return 0 if result["ok"] else 1
+
+
+def cmd_mr_check(args) -> int:
+    from clavure.mrcheck import run_mr_check
+
+    result, _report = run_mr_check(
+        args.target_ref,
+        Path(args.config),
+        Path(args.out),
+        fetch=args.fetch,
+        runtime=args.runtime,
+        cluster_name=args.cluster_name,
+    )
+    print((Path(args.out) / "summary.md").read_text())
+    print(f"CLAVURE_RESULT={result}")
+    if args.fail_on_violation and result != "NO_VIOLATION":
+        return 1
+    return 0
+
+
+def cmd_gate(args) -> int:
+    from clavure.verification.gate import evaluate_gate
+
+    decision = evaluate_gate(Path(args.artifacts))
+    print(json.dumps(decision, indent=2))
+    return 0 if decision["pass"] else 1
 
 
 def cmd_report(args) -> int:
@@ -205,7 +269,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     ap = sub.add_parser("apply-remediation", help="apply the selected plan to manifests in place")
     ap.add_argument("--plan", required=True)
-    ap.add_argument("--manifests", nargs="+", required=True)
+    ap.add_argument("--manifests", nargs="+", help="defaults to manifests in --config")
+    ap.add_argument("--scenario", help="defaults to scenario in --config")
+    ap.add_argument("--config", default=".clavure.yaml")
+    ap.add_argument(
+        "--verify",
+        action="store_true",
+        help="independently verify after applying; roll back on failure",
+    )
     ap.set_defaults(func=cmd_apply)
 
     v = sub.add_parser("verify-model", help="independent deterministic model verification")
@@ -219,9 +290,29 @@ def build_parser() -> argparse.ArgumentParser:
 
     g = sub.add_parser("guard", help="fail if trusted files differ from the base ref")
     g.add_argument("--base-ref", required=True)
-    g.add_argument("--manifest", default=".clavure-trusted.yaml")
+    g.add_argument("--config", default=".clavure.yaml")
     g.add_argument("--repo", default=".")
     g.set_defaults(func=cmd_guard)
+
+    m = sub.add_parser("mr-check", help="model pipeline for a merge request vs. its target ref")
+    m.add_argument(
+        "--target-ref", required=True, help="git ref of the target branch, e.g. origin/main"
+    )
+    m.add_argument("--config", default=".clavure.yaml")
+    m.add_argument("--out", default="artifacts/mr-check")
+    m.add_argument("--fetch", action="store_true", help="git fetch the target branch first")
+    m.add_argument("--runtime", action="store_true", help="also run runtime stages on k3d")
+    m.add_argument("--cluster-name", default="clavure-ci")
+    m.add_argument(
+        "--fail-on-violation",
+        action="store_true",
+        help="exit 1 unless the change introduces no violation",
+    )
+    m.set_defaults(func=cmd_mr_check)
+
+    gt = sub.add_parser("gate", help="CI gate: fail on mandatory security failures")
+    gt.add_argument("--artifacts", default="artifacts")
+    gt.set_defaults(func=cmd_gate)
 
     r = sub.add_parser("report", help="render clavure-report.html from artifacts")
     r.add_argument("--artifacts", default="artifacts")

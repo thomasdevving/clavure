@@ -1,0 +1,34 @@
+# Clavure repository configuration.
+#
+# This file is itself trusted (listed below): changing which files are trusted,
+# or which requirements are enforced, needs code-owner approval.
+scenario: demo/scenario.yaml
+
+# Manifest roots analysed as the desired state. Directories are read
+# recursively (*.yaml / *.yml).
+manifests:
+  - demo/manifests
+
+# Files and directories that automated agents (GitLab Duo flows) must never
+# change. CI job `guard:trusted-files` fails a merge request authored by an
+# automated identity that touches any of them; CODEOWNERS requires security
+# owners to approve human changes.
+trusted:
+  - .clavure.yaml
+  - demo/scenario.yaml
+  - clavure/verification/
+  - clavure/core/
+  - tests/
+  - .gitlab-ci.yml
+  - .gitlab/CODEOWNERS
+  - .gitlab/duo/
+  - flows/
+
+# Identities treated as automated (GitLab Duo flow service accounts are named
+# ai-<flow>-<group>). Matched against GITLAB_USER_LOGIN in CI.
+automated_identity_patterns:
+  - "^ai-"
+  - "^project_\\d+_bot"
+  - "^group_\\d+_bot"
+# Branch prefix used by the Clavure Duo flow for remediation branches.
+remediation_branch_prefix: clavure/remediation-

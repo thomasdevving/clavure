@@ -239,7 +239,10 @@ def evaluate_constraints(
     engine = engine or ReachabilityEngine(inv)
     out: list[ConstraintEvaluation] = []
     for c in scenario.required:
-        conns, problem = required_connections(c, scenario, inv, engine)
+        try:
+            conns, problem = required_connections(c, scenario, inv, engine)
+        except ResolutionError as exc:
+            conns, problem = [], str(exc)
         verdicts = {x.verdict for x in conns}
         if problem:
             status, detail = ConstraintStatus.VIOLATED, problem
@@ -261,7 +264,22 @@ def evaluate_constraints(
             )
         )
     for c in scenario.forbidden:
-        conns = forbidden_connections(c, scenario, inv, engine)
+        try:
+            conns = forbidden_connections(c, scenario, inv, engine)
+        except ResolutionError as exc:
+            # A connection between workloads that do not exist cannot happen.
+            out.append(
+                ConstraintEvaluation(
+                    constraint_id=c.id,
+                    kind="forbidden",
+                    source=c.source,
+                    destination=c.destination,
+                    status=ConstraintStatus.SATISFIED,
+                    connections=[],
+                    detail=f"vacuously satisfied: {exc}",
+                )
+            )
+            continue
         verdicts = {x.verdict for x in conns}
         if Verdict.ALLOWED in verdicts:
             allowed = sorted(x.port for x in conns if x.verdict == Verdict.ALLOWED)

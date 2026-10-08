@@ -21,12 +21,17 @@ Environment knobs (all optional):
   CLAVURE_K3S_RESTRICT_OOM   "1" to install the restrict_oom_score_adj
                              containerd template (nested sandboxes)
   K3D_IMAGE_TOOLS            k3d helper image override (passed through)
+  CLAVURE_K3D_API_HOST       host name under which the k3d API server is
+                             reachable from where kubectl runs (e.g. "docker"
+                             for GitLab docker-in-docker services); adds a TLS
+                             SAN and rewrites the kubeconfig server address
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass, field
@@ -56,6 +61,7 @@ class ClusterController:
     k3s_image: str = DEFAULT_K3S_IMAGE
     ca_bundle: Path | None = None
     restrict_oom: bool = False
+    api_host: str | None = None
     state_dir: Path = field(default_factory=lambda: STATE_DIR)
 
     @classmethod
@@ -66,6 +72,7 @@ class ClusterController:
             k3s_image=os.environ.get("CLAVURE_K3S_IMAGE", DEFAULT_K3S_IMAGE),
             ca_bundle=Path(ca) if ca else None,
             restrict_oom=os.environ.get("CLAVURE_K3S_RESTRICT_OOM") == "1",
+            api_host=os.environ.get("CLAVURE_K3D_API_HOST") or None,
         )
 
     # ------------------------------------------------------------------
@@ -122,6 +129,13 @@ class ClusterController:
             "--timeout",
             f"{wait_seconds}s",
         ]
+        if self.api_host:
+            cmd += [
+                "--api-port",
+                "0.0.0.0:6550",
+                "--k3s-arg",
+                f"--tls-san={self.api_host}@server:*",
+            ]
         if self.ca_bundle:
             cmd += ["-v", f"{self.ca_bundle.resolve()}:/etc/ssl/certs/ca-certificates.crt@server:*"]
         if self.restrict_oom:
@@ -140,7 +154,12 @@ class ClusterController:
     def _write_kubeconfig(self) -> None:
         self.state_dir.mkdir(parents=True, exist_ok=True)
         proc = _run(["k3d", "kubeconfig", "get", self.name], timeout=60)
-        self.kubeconfig.write_bytes(proc.stdout)
+        data = proc.stdout
+        if self.api_host:
+            data = re.sub(
+                rb"server: https://[^:\s]+:", f"server: https://{self.api_host}:".encode(), data
+            )
+        self.kubeconfig.write_bytes(data)
         self.kubeconfig.chmod(0o600)
 
     def delete(self) -> None:

@@ -1,0 +1,9 @@
+# Pinned runtime dependencies for CI and the GitLab Duo flow environment.
+# Regenerate with: uv pip compile pyproject.toml -o requirements.lock
+annotated-types==0.8.0
+networkx==3.7
+pydantic==2.14.0
+pydantic-core==2.50.0
+pyyaml==6.0.3
+typing-extensions==4.16.0
+typing-inspection==0.4.4

@@ -1,0 +1,16 @@
+# Clavure trusted files. Changes require approval from the security owners.
+# Enable "Require approval from code owners" on the protected default branch
+# (Settings > Repository > Protected branches) for this file to be enforced.
+# Replace @clavure-security-owners with the real group in your namespace.
+
+[Trusted security requirements and verification][1] @clavure-security-owners
+/.clavure.yaml
+/demo/scenario.yaml
+/clavure/verification/
+/clavure/core/
+/tests/
+/.gitlab-ci.yml
+/.gitlab/
+/flows/
+/requirements.lock
+/requirements-dev.lock

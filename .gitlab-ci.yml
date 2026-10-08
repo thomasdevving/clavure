@@ -1,0 +1,280 @@
+# Clavure CI/CD — GitLab pipeline
+#
+# Merge request pipelines:  lint, tests, trusted-file guard, mr-check,
+#   verification with TARGET-BRANCH verifier code and requirements, optional
+#   runtime verification on a disposable k3d cluster, security scanning,
+#   security gate, report.
+# Default branch pipelines: lint, tests, closed-loop model pipeline, package,
+#   report. Staging deployment is manual and protected; nothing deploys to
+#   production from this pipeline.
+#
+# Required project settings (instructions alone are not a security boundary):
+#   * Protected default branch, "Require approval from code owners" enabled.
+#   * "Pipelines must succeed" for merge requests.
+#   * The Duo flow service account has the Developer role only.
+#   * Recommended: enforce `guard:trusted-files` and `verify:trusted` with a
+#     pipeline execution policy or an external CI config file, because an MR
+#     can otherwise edit this file (it is a trusted file guarded by CODEOWNERS).
+
+stages:
+  - lint
+  - test
+  - analyze
+  - verify
+  - runtime
+  - gate
+  - package
+  - report
+  - deploy
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYTHON_IMAGE: "python:3.12-slim"
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+.python:
+  image: $PYTHON_IMAGE
+  cache:
+    key:
+      files: [requirements-dev.lock]
+    paths: [.cache/pip]
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git >/dev/null
+    - pip install -q -r requirements-dev.lock
+    - pip install -q --no-deps -e .
+
+.mr_only:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# --------------------------------------------------------------------------
+lint:
+  extends: .python
+  stage: lint
+  script:
+    - ruff check .
+    - ruff format --check .
+
+.pytest:
+  extends: .python
+  stage: test
+  artifacts:
+    when: always
+    reports:
+      junit: junit-*.xml
+
+test:policy-parsing:
+  extends: .pytest
+  script: pytest tests/unit/test_parser.py --junitxml=junit-parsing.xml
+
+test:k8s-semantics:
+  extends: .pytest
+  script: pytest tests/unit/test_semantics.py tests/unit/test_differential.py --junitxml=junit-semantics.xml
+
+test:graph-consistency:
+  extends: .pytest
+  script: pytest tests/unit/test_graph.py tests/unit/test_demo_analysis.py --junitxml=junit-graph.xml
+
+test:optimizer:
+  extends: .pytest
+  script: pytest tests/unit/test_optimizer.py --junitxml=junit-optimizer.xml
+
+test:remediation-verification:
+  extends: .pytest
+  script: >-
+    pytest tests/unit/test_verification_model.py tests/unit/test_pipeline_report.py
+    tests/unit/test_guard_gate.py tests/unit/test_flow_config.py --junitxml=junit-verification.xml
+
+# --------------------------------------------------------------------------
+guard:trusted-files:
+  extends: [.python, .mr_only]
+  stage: analyze
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - clavure guard --base-ref "$CI_MERGE_REQUEST_DIFF_BASE_SHA" > guard.json || { cat guard.json; exit 1; }
+    - cat guard.json
+  artifacts:
+    when: always
+    paths: [guard.json]
+
+analyze:mr:
+  extends: [.python, .mr_only]
+  stage: analyze
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - git fetch -q origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - clavure mr-check --target-ref "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --out artifacts
+  artifacts:
+    when: always
+    expose_as: "Clavure analysis"
+    paths: [artifacts/]
+
+# Runs verifier code + requirements from the TARGET branch against this MR's
+# manifests, so an MR cannot weaken the checks that judge it.
+verify:trusted:
+  extends: [.python, .mr_only]
+  stage: verify
+  variables:
+    GIT_DEPTH: "0"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git >/dev/null
+  script:
+    - git fetch -q origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - git worktree add --detach /tmp/trusted "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - python -m venv /tmp/trusted-venv
+    - /tmp/trusted-venv/bin/pip install -q -r /tmp/trusted/requirements.lock
+    - /tmp/trusted-venv/bin/pip install -q --no-deps /tmp/trusted
+    - cd /tmp && /tmp/trusted-venv/bin/python -m clavure.verification.trusted_ci --trusted-root /tmp/trusted --mr-root "$CI_PROJECT_DIR" --out "$CI_PROJECT_DIR/artifacts"
+  artifacts:
+    when: always
+    paths: [artifacts/trusted-model-verification.json]
+
+# Real runtime verification. Needs a runner with privileged docker-in-docker,
+# tagged `clavure-privileged`, and CLAVURE_RUNTIME_RUNNER=true. Without such a
+# runner the job is not created and the report states that runtime
+# verification was not executed; it is never replaced by mocks.
+runtime:k3d:
+  stage: runtime
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      alias: docker
+  tags: [clavure-privileged]
+  rules:
+    - if: $CLAVURE_RUNTIME_RUNNER != "true"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    GIT_DEPTH: "0"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    CLAVURE_K3D_API_HOST: docker
+    K3D_VERSION: v5.7.4
+    KUBECTL_VERSION: v1.31.1
+  timeout: 45m
+  before_script:
+    - apk add --no-cache python3 py3-pip git curl bash
+    - curl -sSfL -o /usr/local/bin/k3d "https://github.com/k3d-io/k3d/releases/download/${K3D_VERSION}/k3d-linux-amd64" && chmod +x /usr/local/bin/k3d
+    - curl -sSfL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && chmod +x /usr/local/bin/kubectl
+    - python3 -m venv /opt/clavure && /opt/clavure/bin/pip install -q -r requirements.lock && /opt/clavure/bin/pip install -q --no-deps .
+    - scripts/build-demo-image.sh
+  script:
+    - |
+      if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then
+        git fetch -q origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        REF="origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+      else
+        REF="HEAD~1"
+      fi
+      /opt/clavure/bin/clavure mr-check --runtime --cluster-name "clavure-ci-$CI_JOB_ID" --target-ref "$REF" --out artifacts/runtime
+  after_script:
+    - k3d cluster delete "clavure-ci-$CI_JOB_ID" || true
+  artifacts:
+    when: always
+    expose_as: "Clavure runtime evidence"
+    paths: [artifacts/runtime/]
+
+# --------------------------------------------------------------------------
+# Mandatory security failures block the pipeline (and therefore the merge
+# when "Pipelines must succeed" is enabled).
+gate:security:
+  extends: [.python, .mr_only]
+  stage: gate
+  needs:
+    - job: analyze:mr
+      artifacts: true
+    - job: guard:trusted-files
+      artifacts: true
+    - job: verify:trusted
+      artifacts: true
+  script:
+    - cp guard.json artifacts/guard.json
+    - clavure gate --artifacts artifacts
+
+# --------------------------------------------------------------------------
+# The demo's default branch deliberately contains the vulnerable change, so the
+# model pipeline records its verdict without failing here; release (tag)
+# pipelines are blocked by gate:release below.
+pipeline:model:
+  extends: .python
+  stage: analyze
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+  script:
+    - clavure pipeline --scenario demo/scenario.yaml --baseline demo/manifests/base --proposed demo/manifests --out artifacts || echo "pipeline verdict is not REMEDIATION_VERIFIED; see artifacts"
+    - test -f artifacts/verification-report.json
+  artifacts:
+    when: always
+    paths: [artifacts/]
+
+gate:release:
+  extends: .python
+  stage: gate
+  rules:
+    - if: $CI_COMMIT_TAG
+  needs:
+    - job: pipeline:model
+      artifacts: true
+  script:
+    - clavure gate --artifacts artifacts
+
+package:wheel:
+  extends: .python
+  stage: package
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+  script:
+    - pip install -q build==1.2.2
+    - python -m build --wheel --outdir dist/
+  artifacts:
+    paths: [dist/]
+
+report:html:
+  extends: .python
+  stage: report
+  needs:
+    - job: analyze:mr
+      artifacts: true
+      optional: true
+    - job: pipeline:model
+      artifacts: true
+      optional: true
+  script:
+    - clavure report --artifacts artifacts
+  artifacts:
+    when: always
+    expose_as: "Clavure report"
+    paths: [artifacts/clavure-report.html]
+
+# --------------------------------------------------------------------------
+# Staging only, manual, protected environment. A green pipeline does not
+# authorize deployment by itself. NOTE: not exercised in this repository's
+# development environment (no staging cluster available).
+deploy:staging:
+  stage: deploy
+  image: $PYTHON_IMAGE
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $STAGING_KUBECONFIG
+      when: manual
+  environment:
+    name: staging
+  resource_group: staging
+  allow_failure: true
+  script:
+    - apt-get update -qq && apt-get install -y -qq curl >/dev/null
+    - curl -sSfL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/v1.31.1/bin/linux/amd64/kubectl" && chmod +x /usr/local/bin/kubectl
+    - kubectl --kubeconfig "$STAGING_KUBECONFIG" apply -R -f demo/manifests/

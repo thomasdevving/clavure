@@ -1,0 +1,222 @@
+# Clavure remediation flow — GitLab Duo Agent Platform custom flow
+# (flow registry v1 syntax; custom-flow restrictions respected: ambient
+# environment, no top-level name/description/product_group, no prompt model,
+# no response schemas).
+#
+# Trigger (configured in AI > Triggers; always a human action):
+#   * Mention the flow service account on a merge request, e.g.
+#     "@ai-clavure-remediation-<group> please check this change", or
+#   * assign the service account as a reviewer of the merge request.
+# Non-human users cannot trigger flows, so the flow cannot re-trigger itself.
+#
+# Division of labour — the agents orchestrate, Clavure decides:
+#   clavure_analyst      runs `clavure mr-check` (deterministic) and routes on
+#                        the CLAVURE_RESULT token it prints
+#   clavure_implementer  runs `clavure apply-remediation --verify` (applies the
+#                        optimizer's selected plan, independently re-verifies,
+#                        rolls back on failure)
+#   clavure_publisher    commits ONLY manifest changes to a new branch and opens
+#                        a merge request with Clavure's evidence
+#   clavure_reporter     posts the evidence summary on the original MR
+#
+# Hard boundaries enforced by the platform, not by instructions:
+#   * run_command is pinned per component with Tool Options: the analyst and
+#     implementer can only execute `clavure`, the publisher only `git`.
+#   * No component has edit_file / create_file_with_contents: agents cannot
+#     write files themselves; only the Clavure CLI changes manifests.
+#   * CI job guard:trusted-files fails any automated MR touching trusted files
+#     (requirements, verifiers, tests, CI, flow config); CODEOWNERS + protected
+#     branches require human security approval to merge.
+version: "v1"
+environment: ambient
+
+components:
+  - name: "clavure_analyst"
+    type: AgentComponent
+    prompt_id: "clavure_analyst_prompt"
+    inputs:
+      - from: "context:project_id"
+        as: "project_id"
+      - from: "context:goal"
+        as: "goal"
+    toolset:
+      - "get_merge_request"
+      - "list_merge_request_diffs"
+      - "read_file"
+      - "run_command":
+          "program": "clavure"
+    max_cycles: 25
+    ui_log_events:
+      - "on_agent_final_answer"
+      - "on_tool_execution_success"
+      - "on_tool_execution_failed"
+
+  - name: "clavure_implementer"
+    type: AgentComponent
+    prompt_id: "clavure_implementer_prompt"
+    inputs:
+      - from: "context:project_id"
+        as: "project_id"
+      - from: "context:goal"
+        as: "goal"
+    toolset:
+      - "read_file"
+      - "run_command":
+          "program": "clavure"
+    max_cycles: 15
+    ui_log_events:
+      - "on_agent_final_answer"
+      - "on_tool_execution_success"
+      - "on_tool_execution_failed"
+
+  - name: "clavure_publisher"
+    type: AgentComponent
+    prompt_id: "clavure_publisher_prompt"
+    inputs:
+      - from: "context:project_id"
+        as: "project_id"
+      - from: "context:goal"
+        as: "goal"
+    toolset:
+      - "read_file"
+      - "get_merge_request"
+      - "create_merge_request"
+      - "run_command":
+          "program": "git"
+    max_cycles: 25
+    ui_log_events:
+      - "on_agent_final_answer"
+      - "on_tool_execution_success"
+      - "on_tool_execution_failed"
+
+  - name: "clavure_reporter"
+    type: AgentComponent
+    prompt_id: "clavure_reporter_prompt"
+    inputs:
+      - from: "context:project_id"
+        as: "project_id"
+      - from: "context:goal"
+        as: "goal"
+      - from: "context:clavure_analyst.final_answer"
+        as: "analysis_result"
+    toolset:
+      - "read_file"
+      - "get_merge_request"
+      - "create_merge_request_note"
+    max_cycles: 12
+    ui_log_events:
+      - "on_agent_final_answer"
+      - "on_tool_execution_failed"
+
+routers:
+  - from: "clavure_analyst"
+    condition:
+      input: "context:clavure_analyst.final_answer"
+      routes:
+        "REMEDIATION_AVAILABLE": "clavure_implementer"
+        "default_route": "clavure_reporter"
+  - from: "clavure_implementer"
+    condition:
+      input: "context:clavure_implementer.final_answer"
+      routes:
+        "IMPLEMENTED": "clavure_publisher"
+        "default_route": "clavure_reporter"
+  - from: "clavure_publisher"
+    to: "clavure_reporter"
+  - from: "clavure_reporter"
+    to: "end"
+
+flow:
+  entry_point: "clavure_analyst"
+
+prompts:
+  - prompt_id: "clavure_analyst_prompt"
+    name: "Clavure analyst"
+    unit_primitives: []
+    prompt_template:
+      system: |
+        You orchestrate Clavure, a deterministic Kubernetes NetworkPolicy security
+        verifier, for one merge request. Clavure decides every security outcome;
+        you never judge security yourself and never change files.
+
+        Steps:
+        1. Identify the merge request IID from the goal. Use get_merge_request to read
+           its target branch.
+        2. Run the Clavure CLI exactly once:
+           program `clavure`, args `mr-check --target-ref origin/<target_branch> --fetch --out artifacts/duo`
+        3. Read the line that starts with `CLAVURE_RESULT=` in the command output.
+           If the command failed or no such line exists, the result is ERROR.
+
+        Your final answer must be ONLY the token after `CLAVURE_RESULT=`
+        (one of REMEDIATION_AVAILABLE, NO_VIOLATION, NO_VALID_REMEDIATION,
+        VERIFICATION_FAILED) or ERROR, with no other text.
+      user: |
+        Project ID: {{project_id}}
+        Request: {{goal}}
+    params:
+      timeout: 300
+
+  - prompt_id: "clavure_implementer_prompt"
+    name: "Clavure implementer"
+    unit_primitives: []
+    prompt_template:
+      system: |
+        You apply the remediation that Clavure's optimizer already selected. You do
+        not choose, edit or improve the change yourself.
+
+        Run exactly once: program `clavure`, args
+        `apply-remediation --plan artifacts/duo/remediation-plan.json --verify`
+
+        The command applies the selected plan to the manifests, runs Clavure's
+        independent verifier, and rolls the files back if verification fails.
+        Your final answer must be ONLY the token after `CLAVURE_RESULT=` in the
+        output (IMPLEMENTED or FAILED), or FAILED if no such line exists.
+      user: |
+        Project ID: {{project_id}}
+        Request: {{goal}}
+    params:
+      timeout: 300
+
+  - prompt_id: "clavure_publisher_prompt"
+    name: "Clavure publisher"
+    unit_primitives: []
+    prompt_template:
+      system: |
+        You publish an already-verified remediation as a merge request.
+
+        Rules:
+        - Commit ONLY files under the manifest directories listed in `.clavure.yaml`
+          (read it). Never stage `artifacts/`, requirements, tests, CI or flow files.
+        - Use program `git` for: `checkout -b clavure/remediation-<source MR IID>`,
+          `add <manifest directories>`, `commit -m "Clavure remediation for !<IID>"`,
+          `push -u origin clavure/remediation-<source MR IID>`.
+        - Then call create_merge_request from that branch into the source merge
+          request's source branch, titled "Clavure remediation for !<IID>", with the
+          description set to the exact contents of `artifacts/duo/mr-description.md`.
+        - Do not merge anything. Humans review and merge.
+        Final answer: the web URL of the created merge request, or FAILED.
+      user: |
+        Project ID: {{project_id}}
+        Request: {{goal}}
+    params:
+      timeout: 300
+
+  - prompt_id: "clavure_reporter_prompt"
+    name: "Clavure reporter"
+    unit_primitives: []
+    prompt_template:
+      system: |
+        You report Clavure's results on the merge request that triggered this flow.
+        Post exactly one note with create_merge_request_note containing:
+        - the contents of `artifacts/duo/summary.md` if it exists (otherwise say that
+          Clavure could not produce a summary and include the analysis result),
+        - the analysis result token,
+        - the remediation merge request URL if one was created in this flow.
+        Report only what Clavure's files say. Never state that runtime verification
+        passed: runtime verification runs later in CI (job runtime:k3d).
+      user: |
+        Project ID: {{project_id}}
+        Request: {{goal}}
+        Analysis result: {{analysis_result}}
+    params:
+      timeout: 180
